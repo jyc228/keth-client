@@ -60,6 +60,13 @@ class ContractGeneratorTest : StringSpec({
         println(gen.generateDefaultImplementation().build())
     }
 
+    "generate event" {
+        compile("/EventTest.sol")
+        val gen = newContractGenerator("EventTest")
+        println(gen.generateInterface().build())
+        println(gen.generateDefaultImplementation().build())
+    }
+
     "generate full test" {
         compile("/FullTest.sol")
         val gen = newContractGenerator("FullTest")

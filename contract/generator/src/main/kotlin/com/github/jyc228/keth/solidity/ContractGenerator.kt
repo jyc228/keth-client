@@ -93,21 +93,19 @@ class ContractGenerator(
             }
             .inherit { `interface`("Event") }
             .body {
-                val hasIndexed = event.inputs.any { it.indexed == true }
-                if (hasIndexed) {
-                    type().`class`("Indexed").body {
-                        event.inputs.forEach {
-                            if (it.indexed == true) {
-                                property(it.name).mutable().type(it.typeToKotlin, true).defaultNull()
-                            }
+                val indexedInputs = event.inputs.filter { it.indexed == true }
+                if (indexedInputs.isNotEmpty()) {
+                    type().`class`("Indexed").constructor {
+                        indexedInputs.forEach {
+                            parameter(it.name).mutable().type(it.typeToKotlin, true).defaultNull()
                         }
                     }
                 }
                 companionObject().inherit {
-                    val indexedClass = if (hasIndexed) "Indexed" else "Unit"
+                    val indexedClass = if (indexedInputs.isNotEmpty()) "Indexed" else "Unit"
                     `class`("ContractEventFactory")
                         .typeParameter(event.name!!)
-                        .typeParameter(if (hasIndexed) "Indexed" else "Unit")
+                        .typeParameter(indexedClass)
                         .invokeConstructor(
                             "${event.name}::class",
                             "${indexedClass}::class",

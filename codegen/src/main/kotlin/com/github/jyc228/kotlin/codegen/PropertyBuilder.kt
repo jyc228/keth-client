@@ -42,7 +42,7 @@ class PropertyBuilder(val name: String, val indent: Indent, val context: Generat
             if (modifier.isNotBlank()) append("$modifier ")
             append(name)
             if (type.isNotBlank()) append(": $type")
-            if (defaultValue.isNotBlank()) append(" = $defaultValue\n")
+            if (defaultValue.isNotBlank()) append(" = $defaultValue")
             if (default != null) append(" = ${default!!.build()}")
         }
     }
