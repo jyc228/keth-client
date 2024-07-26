@@ -19,6 +19,6 @@ data class Log(
 data class GetLogsRequest(
     var fromBlock: BlockReference? = null,
     var toBlock: BlockReference? = null,
-    var address: String? = null,
+    var address: Address? = null,
     var topics: List<String?>? = null
 )

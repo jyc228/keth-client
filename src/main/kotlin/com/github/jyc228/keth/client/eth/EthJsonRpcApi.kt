@@ -32,7 +32,7 @@ class EthJsonRpcApi(client: JsonRpcClient) : EthApi, AbstractJsonRpcApi(client) 
     override suspend fun gasPrice(): ApiResult<HexBigInt> = "eth_gasPrice"()
     override suspend fun blockNumber(): ApiResult<HexULong> = "eth_blockNumber"()
 
-    override suspend fun getHeaderByHash(hash: Hash): ApiResult<RpcBlockHeader> = "eth_getHeaderByHash"(hash.hex)
+    override suspend fun getHeaderByHash(hash: Hash): ApiResult<RpcBlockHeader> = "eth_getHeaderByHash"(hash)
     override suspend fun getHeaderByNumber(number: ULong) = getHeaderByNumber(number.ref)
     override suspend fun getHeaderByNumber(tag: String) = getHeaderByNumber(tag.ref)
     override suspend fun getHeaderByNumber(ref: BlockReference): ApiResult<RpcBlockHeader> =
@@ -47,10 +47,10 @@ class EthJsonRpcApi(client: JsonRpcClient) : EthApi, AbstractJsonRpcApi(client) 
     }
 
     private suspend fun getFullBlockByHash(hash: Hash): ApiResult<Block<TransactionObjects>?> =
-        "eth_getBlockByHash"(hash.hex, true)
+        "eth_getBlockByHash"(hash, true)
 
     private suspend fun getSimpleBlockByHash(hash: Hash): ApiResult<Block<TransactionHashes>?> =
-        "eth_getBlockByHash"(hash.hex, false)
+        "eth_getBlockByHash"(hash, false)
 
     override suspend fun getBlockByNumber(number: ULong, fullTx: Boolean) = getBlockByNumber(number.ref, fullTx)
     override suspend fun getBlockByNumber(tag: String, fullTx: Boolean) = getBlockByNumber(tag.ref, fullTx)
@@ -64,7 +64,7 @@ class EthJsonRpcApi(client: JsonRpcClient) : EthApi, AbstractJsonRpcApi(client) 
     }
 
     override suspend fun getBlockTransactionCountByHash(hash: Hash): ApiResult<HexULong> =
-        "eth_getBlockTransactionCountByHash"(hash.hex)
+        "eth_getBlockTransactionCountByHash"(hash)
 
     override suspend fun getBlockTransactionCountByNumber(number: ULong): ApiResult<HexULong> =
         getBlockTransactionCountByNumber(number.ref)

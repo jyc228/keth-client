@@ -21,7 +21,7 @@ abstract class AbstractContract<EVENT : ContractEvent>(
             .mapNotNull { it.companionObjectInstance as? ContractEventFactory<EVENT, *> }
             .associateBy { it.hash }
 
-        val request = GetLogsRequest(address = address.hex).apply { options?.invoke(this) }
+        val request = GetLogsRequest(address = address).apply { options?.invoke(this) }
         return api.getLogs(request).map { logs ->
             logs.mapNotNull { log ->
                 eventFactoryByHash[log.topics[0].hex]?.decodeIf(log.data, log.topics)?.let { e -> e to log }
@@ -33,7 +33,7 @@ abstract class AbstractContract<EVENT : ContractEvent>(
         factory: FACTORY,
         filterParameter: (GetLogsRequest.(INDEXED) -> Unit)?
     ): ApiResult<List<Pair<EVENT, Log>>> {
-        val request = GetLogsRequest(address = address.hex)
+        val request = GetLogsRequest(address = address)
         if (filterParameter != null) {
             request.topics = factory.buildTopics { filterParameter(request, this) }
         }
