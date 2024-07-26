@@ -60,3 +60,5 @@ dependencies {
     implementation("io.ktor:ktor-serialization-jackson:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
 }
+
+publishing(createGPRPublisher { artifactId = "client" })
