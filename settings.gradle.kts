@@ -3,3 +3,9 @@ plugins {
 }
 
 rootProject.name = "keth-client"
+
+include("codegen")
+include("contract")
+include("contract:abi")
+include("contract:generator")
+include("contract:solidity-plugin")
