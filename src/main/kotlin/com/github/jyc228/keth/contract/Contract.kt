@@ -10,10 +10,10 @@ import com.github.jyc228.keth.type.Log
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 
-interface Contract<EVENT : ContractEvent> {
-    suspend fun getLogs(options: (GetLogsRequest.() -> Unit)? = null): ApiResult<List<Pair<EVENT, Log>>>
+interface Contract<ROOT_EVENT : ContractEvent> {
+    suspend fun getLogs(options: (GetLogsRequest.() -> Unit)? = null): ApiResult<List<Pair<ROOT_EVENT, Log>>>
 
-    suspend fun <INDEXED : Any, FACTORY : ContractEventFactory<out EVENT, INDEXED>> getLogs(
+    suspend fun <EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
         factory: FACTORY,
         filterParameter: (GetLogsRequest.(indexedParam: INDEXED) -> Unit)? = null
     ): ApiResult<List<Pair<EVENT, Log>>>

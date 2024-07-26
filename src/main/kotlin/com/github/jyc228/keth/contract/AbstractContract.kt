@@ -9,16 +9,16 @@ import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.superclasses
 
-abstract class AbstractContract<EVENT : ContractEvent>(
+abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
     private val address: Address,
     private val api: EthApi
-) : Contract<EVENT> {
+) : Contract<ROOT_EVENT> {
 
-    override suspend fun getLogs(options: (GetLogsRequest.() -> Unit)?): ApiResult<List<Pair<EVENT, Log>>> {
+    override suspend fun getLogs(options: (GetLogsRequest.() -> Unit)?): ApiResult<List<Pair<ROOT_EVENT, Log>>> {
         val contractInterface = this::class.superclasses.first { it.isSubclassOf(Contract::class) }
         val eventFactoryByHash = contractInterface
             .nestedClasses
-            .mapNotNull { it.companionObjectInstance as? ContractEventFactory<EVENT, *> }
+            .mapNotNull { it.companionObjectInstance as? ContractEventFactory<ROOT_EVENT, *> }
             .associateBy { it.hash }
 
         val request = GetLogsRequest(address = address).apply { options?.invoke(this) }
@@ -29,7 +29,7 @@ abstract class AbstractContract<EVENT : ContractEvent>(
         }
     }
 
-    override suspend fun <INDEXED : Any, FACTORY : ContractEventFactory<out EVENT, INDEXED>> getLogs(
+    override suspend fun <EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
         factory: FACTORY,
         filterParameter: (GetLogsRequest.(INDEXED) -> Unit)?
     ): ApiResult<List<Pair<EVENT, Log>>> {
