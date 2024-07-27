@@ -19,7 +19,7 @@ fun Project.createGPRPublisher(configuration: MavenPublication.() -> Unit): Publ
         publications {
             create<MavenPublication>("gpr") {
                 this.from(components["java"])
-                this.groupId = "com.github.jyc228.keth"
+                this.groupId = "com.github.jyc228"
                 this.version = project.version.toString()
                 this.configuration()
             }
