@@ -10,7 +10,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: pontem-network/get-solc@master
         with:
-          version: v0.8.23
+          version: v0.8.25
       - uses: actions/setup-java@v4
         with:
           java-version: 17
