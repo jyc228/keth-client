@@ -3,20 +3,19 @@ package com.github.jyc228.keth.solidity
 import com.github.jyc228.keth.solidity.compile.CompileResult
 import java.io.File
 import kotlinx.serialization.json.Json
-import org.gradle.api.tasks.Internal
+import org.gradle.api.internal.file.FileTreeInternal
+import org.gradle.api.internal.tasks.compile.CompilationSourceDirs
 import org.gradle.api.tasks.SourceTask
 import org.gradle.api.tasks.TaskAction
 
 open class GenerateCodeTask : SourceTask() {
 
-    @Internal
-    lateinit var solidityRoot: File
-
     @TaskAction
     fun execute() {
+        val solidityRoot = CompilationSourceDirs.inferSourceRoots(this.source as FileTreeInternal).single()
         val genLibraryByFullName = mutableMapOf<String, LibraryGenerator>()
         source.filter { it.extension == "sol" }
-            .forEach { file -> generateContractFromSol(file, genLibraryByFullName) }
+            .forEach { file -> generateContractFromSol(file, solidityRoot, genLibraryByFullName) }
         source.filter { it.extension == "abi" }
             .forEach { file -> generateContractFromAbi(file, solidityRoot, genLibraryByFullName) }
         genLibraryByFullName.toList().forEach { (fullName, gen) -> generateLibrary(fullName, gen) }
@@ -24,9 +23,10 @@ open class GenerateCodeTask : SourceTask() {
 
     private fun generateContractFromSol(
         file: File,
+        srcRoot: File,
         genLibraryByFullName: MutableMap<String, LibraryGenerator>
     ) {
-        val outputDir = file.relativeTo(solidityRoot).parent ?: ""
+        val outputDir = file.relativeTo(srcRoot).parent ?: ""
         if (!File(outputs.files.singleFile, "$outputDir/${file.nameWithoutExtension}.bin").exists()) {
             val compileOutput = File(outputs.files.singleFile, outputDir)
             project.exec {

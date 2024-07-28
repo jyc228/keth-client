@@ -25,7 +25,6 @@ class SolidityPlugin : Plugin<Project> {
         val taskName = if (sourceSet.name == "main") "" else sourceSet.name.capitalized()
         target.tasks.create<GenerateCodeTask>("generate${taskName}KotlinContractWrapper") {
             source = set
-            solidityRoot = set.srcDirs.single()
             outputs.dir(output)
             target.tasks.getByName("compileKotlin").dependsOn(this)
         }
