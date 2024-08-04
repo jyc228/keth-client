@@ -5,6 +5,7 @@ import com.github.jyc228.kotlin.codegen.BodyBuilder
 import com.github.jyc228.kotlin.codegen.GenerationContext
 import com.github.jyc228.kotlin.codegen.KtFileBuilder
 import com.github.jyc228.kotlin.codegen.TypeBuilder
+import java.util.Locale
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
@@ -94,24 +95,21 @@ class ContractGenerator(
             .inherit { `interface`("Event") }
             .body {
                 val indexedInputs = event.inputs.filter { it.indexed == true }
-                if (indexedInputs.isNotEmpty()) {
-                    type().`class`("Indexed").constructor {
-                        indexedInputs.forEach {
-                            parameter(it.name).mutable().type(it.typeToKotlin, true).defaultNull()
-                        }
-                    }
-                }
                 companionObject().inherit {
-                    val indexedClass = if (indexedInputs.isNotEmpty()) "Indexed" else "Unit"
                     `class`("ContractEventFactory")
                         .typeParameter(event.name!!)
-                        .typeParameter(indexedClass)
                         .invokeConstructor(
                             "${event.name}::class",
-                            "${indexedClass}::class",
                             "\"0x${event.computeSig()}\"",
                             "{ ${event.toJsonStringTemplate()} }"
                         )
+                }.body {
+                    indexedInputs.forEachIndexed { index, input ->
+                        function("Topics.filterBy${input.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }}")
+                            .parameter("vararg ${input.name}", input.typeToKotlin)
+                            .expressionBody(" = apply { filterByAddress(${index + 1}, *${input.name}) }")
+                        context.reportType("Topics")
+                    }
                 }
             }
     }

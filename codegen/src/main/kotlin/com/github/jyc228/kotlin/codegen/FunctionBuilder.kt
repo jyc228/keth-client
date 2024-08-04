@@ -34,6 +34,8 @@ class FunctionBuilder(val name: String, val indent: Indent, val context: Generat
         body = " {\n${indent.next}$code\n$indent}"
     }
 
+    fun expressionBody(@Language("kotlin") code: String) = apply { body = code }
+
     fun build() = buildString {
         if (tokens.isNotEmpty()) append(tokens.joinToString(" ")).append(" ")
         append("fun $name(${buildParameter()})$returnType$body")

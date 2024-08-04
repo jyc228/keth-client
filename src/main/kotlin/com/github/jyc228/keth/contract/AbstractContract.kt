@@ -2,6 +2,7 @@ package com.github.jyc228.keth.contract
 
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
+import com.github.jyc228.keth.contract.Contract.GetEventRequest
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.GetLogsRequest
 import com.github.jyc228.keth.type.Log
@@ -18,10 +19,10 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
         val contractInterface = this::class.superclasses.first { it.isSubclassOf(Contract::class) }
         val eventFactoryByHash = contractInterface
             .nestedClasses
-            .mapNotNull { it.companionObjectInstance as? ContractEventFactory<ROOT_EVENT, *> }
-            .associateBy { it.hash }
+            .mapNotNull { it.companionObjectInstance as? ContractEventFactory<ROOT_EVENT> }
+            .associateBy { it.hash.hex }
 
-        val request = GetLogsRequest(address = address).apply { options?.invoke(this) }
+        val request = GetLogsRequest(address = mutableSetOf(address)).apply { options?.invoke(this) }
         return api.getLogs(request).map { logs ->
             logs.mapNotNull { log ->
                 eventFactoryByHash[log.topics[0].hex]?.decodeIf(log.data, log.topics)?.let { e -> e to log }
@@ -29,15 +30,23 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
         }
     }
 
-    override suspend fun <EVENT : ROOT_EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
-        factory: FACTORY,
-        filterParameter: (GetLogsRequest.(INDEXED) -> Unit)?
-    ): ApiResult<List<Pair<EVENT, Log>>> {
-        val request = GetLogsRequest(address = address)
-        if (filterParameter != null) {
-            request.topics = factory.buildTopics { filterParameter(request, this) }
+    override suspend fun getLogs(
+        vararg requests: GetEventRequest<ROOT_EVENT>,
+        options: (GetLogsRequest.() -> Unit)?
+    ): ApiResult<List<Pair<ROOT_EVENT, Log>>> {
+        val request = GetLogsRequest(address = mutableSetOf(address)).apply {
+            requests.forEach { it.buildTopic(topics) }
+            options?.invoke(this)
         }
-        return api.getLogs(request).map { logs -> logs.map { log -> factory.decode(log.data, log.topics) to log } }
+        return api.getLogs(request).map { logs ->
+            val eventRequestByHash = requests.associateBy { it.factory.hash.hex }
+            logs.map { log ->
+                val eventRequest = requireNotNull(eventRequestByHash[log.topics.first().hex])
+                val decoded = eventRequest.factory.decode(log.data, log.topics)
+                eventRequest.subscribe?.invoke(decoded)
+                decoded to log
+            }
+        }
     }
 
     operator fun <R> ContractFunctionP0<R>.invoke(): ContractFunctionRequest<R> = toRequest(encodeFunctionCall())

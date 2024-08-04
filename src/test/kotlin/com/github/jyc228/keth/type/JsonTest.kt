@@ -8,6 +8,15 @@ import kotlinx.serialization.json.Json
 class JsonTest : StringSpec({
     "GetLogsRequest to json" {
         val address = Address.fromHexString("0x1")
-        Json.encodeToString(GetLogsRequest(address = address)) shouldBe """{"address":"0x1"}"""
+        Json.encodeToString(GetLogsRequest(address = mutableSetOf(address))) shouldBe """{"address":["0x1"]}"""
+
+        Json.encodeToString(
+            GetLogsRequest(
+                topics = Topics().filterByAddress(
+                    1,
+                    address
+                )
+            )
+        ) shouldBe """{"topics":[null,["0x0000000000000000000000000000000000000000000000000000000000000001"]]}"""
     }
 })

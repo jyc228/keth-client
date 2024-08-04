@@ -10,6 +10,7 @@ abstract class SolidityCodeGen {
             "HexInt" -> "com.github.jyc228.keth.type.HexInt"
             "HexULong" -> "com.github.jyc228.keth.type.HexULong"
             "HexBigInt" -> "com.github.jyc228.keth.type.HexBigInt"
+            "Topics" -> "com.github.jyc228.keth.type.Topics"
 
             "Indexed" -> "com.github.jyc228.keth.contract.Indexed"
             "@Indexed" -> "com.github.jyc228.keth.contract.Indexed"

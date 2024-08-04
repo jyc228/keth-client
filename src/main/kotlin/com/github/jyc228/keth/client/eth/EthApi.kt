@@ -15,6 +15,7 @@ import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexString
 import com.github.jyc228.keth.type.HexULong
 import com.github.jyc228.keth.type.Log
+import com.github.jyc228.keth.type.Topics
 import com.github.jyc228.keth.type.Transaction
 import com.github.jyc228.keth.type.TransactionHashes
 import com.github.jyc228.keth.type.TransactionObjects
@@ -101,9 +102,9 @@ interface EthApi {
     suspend fun getLogs(init: GetLogsRequest.() -> Unit): ApiResult<List<Log>> = getLogs(GetLogsRequest().apply(init))
 
     suspend fun <T : ContractEvent> getLogs(
-        event: ContractEventFactory<T, *>,
+        event: ContractEventFactory<T>,
         init: GetLogsRequest.() -> Unit
-    ): List<Pair<T, Log>> = getLogs(GetLogsRequest(topics = listOf(event.hash)).apply(init))
+    ): List<Pair<T, Log>> = getLogs(GetLogsRequest(topics = Topics().filterByEvent(event)).apply(init))
         .awaitOrThrow()
         .mapNotNull { log -> event.decodeIf(log.data, log.topics)?.let { e -> e to log } }
 
