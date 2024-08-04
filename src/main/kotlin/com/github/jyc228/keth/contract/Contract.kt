@@ -13,7 +13,7 @@ import org.intellij.lang.annotations.Language
 interface Contract<ROOT_EVENT : ContractEvent> {
     suspend fun getLogs(options: (GetLogsRequest.() -> Unit)? = null): ApiResult<List<Pair<ROOT_EVENT, Log>>>
 
-    suspend fun <EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
+    suspend fun <EVENT : ROOT_EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
         factory: FACTORY,
         filterParameter: (GetLogsRequest.(indexedParam: INDEXED) -> Unit)? = null
     ): ApiResult<List<Pair<EVENT, Log>>>

@@ -29,7 +29,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
         }
     }
 
-    override suspend fun <EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
+    override suspend fun <EVENT : ROOT_EVENT, INDEXED, FACTORY : ContractEventFactory<EVENT, INDEXED>> getLogs(
         factory: FACTORY,
         filterParameter: (GetLogsRequest.(INDEXED) -> Unit)?
     ): ApiResult<List<Pair<EVENT, Log>>> {
