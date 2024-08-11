@@ -4,7 +4,6 @@ import com.github.jyc228.keth.client.AbstractJsonRpcApi
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.JsonRpcClient
 import com.github.jyc228.keth.type.Address
-import com.github.jyc228.keth.type.Block
 import com.github.jyc228.keth.type.BlockReference
 import com.github.jyc228.keth.type.CallRequest
 import com.github.jyc228.keth.type.GetLogsRequest
@@ -17,9 +16,8 @@ import com.github.jyc228.keth.type.Log
 import com.github.jyc228.keth.type.RpcBlock
 import com.github.jyc228.keth.type.RpcBlockHeader
 import com.github.jyc228.keth.type.RpcTransaction
-import com.github.jyc228.keth.type.TransactionHashes
-import com.github.jyc228.keth.type.TransactionObjects
 import com.github.jyc228.keth.type.TransactionReceipt
+import com.github.jyc228.keth.type.Transactions
 import com.github.jyc228.keth.type.UncleBlock
 import java.math.BigInteger
 import org.web3j.crypto.Credentials
@@ -32,35 +30,17 @@ class EthJsonRpcApi(client: JsonRpcClient) : EthApi, AbstractJsonRpcApi(client) 
     override suspend fun gasPrice(): ApiResult<HexBigInt> = "eth_gasPrice"()
     override suspend fun blockNumber(): ApiResult<HexULong> = "eth_blockNumber"()
 
-    override suspend fun getHeaderByHash(hash: Hash): ApiResult<RpcBlockHeader> = "eth_getHeaderByHash"(hash)
-    override suspend fun getHeaderByNumber(number: ULong) = getHeaderByNumber(number.ref)
-    override suspend fun getHeaderByNumber(tag: String) = getHeaderByNumber(tag.ref)
-    override suspend fun getHeaderByNumber(ref: BlockReference): ApiResult<RpcBlockHeader> =
-        "eth_getHeaderByNumber"(ref)
-
-    override suspend fun getBlockByHash(
-        hash: Hash,
-        fullTx: Boolean
-    ): ApiResult<out Block<*>?> = when (fullTx) {
-        true -> getFullBlockByHash(hash)
-        false -> getSimpleBlockByHash(hash)
+    override suspend fun getHeader(ref: BlockReference): ApiResult<RpcBlockHeader> = when (ref.hash) {
+        true -> "eth_getHeaderByHash"(ref.value)
+        false -> "eth_getHeaderByNumber"(ref.value)
     }
 
-    private suspend fun getFullBlockByHash(hash: Hash): ApiResult<Block<TransactionObjects>?> =
-        "eth_getBlockByHash"(hash, true)
-
-    private suspend fun getSimpleBlockByHash(hash: Hash): ApiResult<Block<TransactionHashes>?> =
-        "eth_getBlockByHash"(hash, false)
-
-    override suspend fun getBlockByNumber(number: ULong, fullTx: Boolean) = getBlockByNumber(number.ref, fullTx)
-    override suspend fun getBlockByNumber(tag: String, fullTx: Boolean) = getBlockByNumber(tag.ref, fullTx)
-
-    override suspend fun getBlockByNumber(
+    override suspend fun <T : Transactions> getBlock(
         ref: BlockReference,
-        fullTx: Boolean
-    ): ApiResult<out Block<*>?> = when (fullTx) {
-        true -> "eth_getBlockByNumber"<RpcBlock<TransactionObjects>, BlockReference, Boolean>(ref, true)
-        false -> "eth_getBlockByNumber"<RpcBlock<TransactionHashes>, BlockReference, Boolean>(ref, false)
+        option: GetBlockOption<T>
+    ): ApiResult<RpcBlock<T>?> = when (ref.hash) {
+        true -> "eth_getBlockByHash"(ref.value, option.fullTx, option.serializer)
+        false -> "eth_getBlockByNumber"(ref.value, option.fullTx, option.serializer)
     }
 
     override suspend fun getBlockTransactionCountByHash(hash: Hash): ApiResult<HexULong> =

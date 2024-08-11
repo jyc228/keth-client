@@ -4,8 +4,6 @@ import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.contract.ContractEvent
 import com.github.jyc228.keth.contract.ContractEventFactory
 import com.github.jyc228.keth.type.Address
-import com.github.jyc228.keth.type.Block
-import com.github.jyc228.keth.type.BlockHeader
 import com.github.jyc228.keth.type.BlockReference
 import com.github.jyc228.keth.type.CallRequest
 import com.github.jyc228.keth.type.GetLogsRequest
@@ -15,45 +13,50 @@ import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexString
 import com.github.jyc228.keth.type.HexULong
 import com.github.jyc228.keth.type.Log
+import com.github.jyc228.keth.type.RpcBlock
+import com.github.jyc228.keth.type.RpcBlockHeader
 import com.github.jyc228.keth.type.Topics
 import com.github.jyc228.keth.type.Transaction
-import com.github.jyc228.keth.type.TransactionHashes
-import com.github.jyc228.keth.type.TransactionObjects
 import com.github.jyc228.keth.type.TransactionReceipt
+import com.github.jyc228.keth.type.Transactions
 import com.github.jyc228.keth.type.UncleBlock
+import com.github.jyc228.keth.type.ref
 
-@Suppress("UNCHECKED_CAST")
 interface EthApi {
     suspend fun chainId(): ApiResult<HexULong>
     suspend fun gasPrice(): ApiResult<HexBigInt>
     suspend fun blockNumber(): ApiResult<HexULong>
 
-    suspend fun getHeaderByHash(hash: Hash): ApiResult<out BlockHeader>
-    suspend fun getHeaderByNumber(number: ULong): ApiResult<out BlockHeader>
-    suspend fun getHeaderByNumber(tag: String): ApiResult<out BlockHeader>
-    suspend fun getHeaderByNumber(ref: BlockReference = BlockReference.latest): ApiResult<out BlockHeader>
-    suspend fun getHeaders(numbers: ULongProgression) = numbers.map { getHeaderByNumber(it) }
+    suspend fun getHeader(ref: BlockReference): ApiResult<RpcBlockHeader>
+    suspend fun getHeaders(numbers: ULongProgression) = numbers.map { getHeader(it.ref) }
+    suspend fun getHeaderByHash(hash: Hash): ApiResult<RpcBlockHeader> = getHeader(hash.ref)
+    suspend fun getHeaderByNumber(number: ULong): ApiResult<RpcBlockHeader> = getHeader(number.ref)
+    suspend fun getHeaderByNumber(tag: String): ApiResult<RpcBlockHeader> = getHeader(BlockReference.fromTag(tag))
 
-    suspend fun getBlockByHash(hash: Hash, fullTx: Boolean): ApiResult<out Block<*>?>
-    suspend fun getBlockByNumber(number: ULong, fullTx: Boolean): ApiResult<out Block<*>?>
-    suspend fun getBlockByNumber(tag: String, fullTx: Boolean): ApiResult<out Block<*>?>
-    suspend fun getBlockByNumber(ref: BlockReference = BlockReference.latest, fullTx: Boolean): ApiResult<out Block<*>?>
+    suspend fun <T : Transactions> getBlock(
+        ref: BlockReference = BlockReference.latest,
+        option: GetBlockOption<T>
+    ): ApiResult<RpcBlock<T>?>
 
-    suspend fun getFullBlock(hash: Hash) = getBlockByHash(hash, true) as ApiResult<Block<TransactionObjects>?>
-    suspend fun getFullBlock(number: ULong) = getFullBlock(BlockReference(number))
-    suspend fun getFullBlock(tag: String) = getFullBlock(BlockReference.fromTag(tag))
-    suspend fun getFullBlock(ref: BlockReference = BlockReference.latest) =
-        getBlockByNumber(ref, true) as ApiResult<Block<TransactionObjects>?>
+    suspend fun <T : Transactions> getBlocks(
+        numbers: ULongProgression,
+        option: GetBlockOption<T>
+    ): List<ApiResult<RpcBlock<T>?>> = numbers.map { getBlock(it.ref, option) }
 
-    suspend fun getFullBlocks(numbers: ULongProgression) = numbers.map { getFullBlock(it) }
+    suspend fun <T : Transactions> getBlockByHash(
+        hash: Hash,
+        option: GetBlockOption<T>
+    ): ApiResult<RpcBlock<T>?> = getBlock(hash.ref, option)
 
-    suspend fun getSimpleBlock(hash: Hash) = getBlockByHash(hash, false) as ApiResult<TransactionHashes?>
-    suspend fun getSimpleBlock(number: ULong) = getSimpleBlock(BlockReference(number))
-    suspend fun getSimpleBlock(tag: String) = getSimpleBlock(BlockReference.fromTag(tag))
-    suspend fun getSimpleBlock(ref: BlockReference = BlockReference.latest) =
-        getBlockByNumber(ref, false) as ApiResult<Block<TransactionHashes>?>
+    suspend fun <T : Transactions> getBlockByNumber(
+        number: ULong,
+        option: GetBlockOption<T>
+    ): ApiResult<RpcBlock<T>?> = getBlock(number.ref, option)
 
-    suspend fun getSimpleBlocks(numbers: ULongProgression) = numbers.map { getSimpleBlock(it) }
+    suspend fun <T : Transactions> getBlockByNumber(
+        tag: String,
+        option: GetBlockOption<T>
+    ): ApiResult<RpcBlock<T>?> = getBlock(BlockReference.fromTag(tag), option)
 
     suspend fun getBlockTransactionCountByHash(hash: Hash): ApiResult<HexULong>
     suspend fun getBlockTransactionCountByNumber(number: ULong): ApiResult<HexULong>

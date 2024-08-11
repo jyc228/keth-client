@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.client
 
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonNull
@@ -18,10 +19,11 @@ abstract class AbstractJsonRpcApi(val client: JsonRpcClient) {
 
     protected suspend inline operator fun <reified T, reified P1, reified P2> String.invoke(
         p1: P1,
-        p2: P2
+        p2: P2,
+        serializer: KSerializer<T> = serializer()
     ): ApiResult<T> {
         val inputs = listOf(Json.encodeToJsonElement(p1), Json.encodeToJsonElement(p2))
-        return client.send(this, JsonArray(inputs), serializer())
+        return client.send(this, JsonArray(inputs), serializer)
     }
 
     protected suspend inline operator fun <reified T, reified P1, reified P2, reified P3> String.invoke(
