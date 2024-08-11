@@ -6,7 +6,7 @@ plugins {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.6.0")
     implementation("org.bouncycastle:bcprov-jdk15on:1.70")
 }
 
