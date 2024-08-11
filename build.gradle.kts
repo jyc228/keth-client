@@ -17,7 +17,7 @@ allprojects {
         testImplementation(kotlin("test"))
         testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
         testImplementation("io.kotest:kotest-runner-junit5:5.8.1")
-        testImplementation("io.kotest:kotest-assertions-core:5.8.1")
+        testImplementation("io.kotest:kotest-assertions-core:5.9.1")
         testImplementation("io.kotest:kotest-assertions-json:5.9.1")
         testImplementation("io.kotest:kotest-framework-datatest:5.8.1")
     }
