@@ -51,7 +51,7 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime-jvm:0.4.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
-    implementation("org.web3j:core:4.10.0")
+    implementation("org.web3j:core:5.0.0")
 
     val ktorVersion = "2.1.2"
     implementation("io.ktor:ktor-client-core:$ktorVersion")
