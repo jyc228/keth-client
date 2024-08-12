@@ -9,7 +9,7 @@ plugins {
 dependencies {
     implementation(project(":contract:generator"))
     implementation(gradleKotlinDsl())
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1")
 
     testImplementation(gradleTestKit())
 }
