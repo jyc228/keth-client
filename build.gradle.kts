@@ -43,7 +43,7 @@ dependencies {
 
     implementation("com.auth0:java-jwt:4.4.0")
 
-    val jacksonVersion = "2.14.1"
+    val jacksonVersion = "2.17.2"
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin:$jacksonVersion")
     implementation("com.fasterxml.jackson.module:jackson-module-parameter-names:$jacksonVersion")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion")
