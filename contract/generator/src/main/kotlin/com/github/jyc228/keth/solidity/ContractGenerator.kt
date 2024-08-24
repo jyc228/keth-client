@@ -107,7 +107,7 @@ class ContractGenerator(
                     indexedInputs.forEachIndexed { index, input ->
                         function("Topics.filterBy${input.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }}")
                             .parameter("vararg ${input.name}", input.typeToKotlin)
-                            .expressionBody(" = apply { filterByAddress(${index + 1}, *${input.name}) }")
+                            .expressionBody(" = apply { filterBy${input.typeToKotlin}(${index + 1}, *${input.name}) }")
                         context.reportType("Topics")
                     }
                 }

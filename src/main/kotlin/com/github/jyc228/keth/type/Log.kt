@@ -1,6 +1,7 @@
 package com.github.jyc228.keth.type
 
 import com.github.jyc228.keth.contract.ContractEventFactory
+import java.math.BigInteger
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -29,6 +30,13 @@ data class GetLogsRequest(
 value class Topics(val list: MutableList<MutableList<HexData>?> = MutableList(1) { null }) {
     fun filterByEvent(e: ContractEventFactory<*>) = apply { insert(0, e.hash.hex) }
     fun filterByAddress(index: Int, vararg address: Address) = apply { address.forEach { insert(index, it.hex) } }
+
+    @OptIn(ExperimentalStdlibApi::class)
+    fun filterByByteArray(index: Int, vararg bytes: ByteArray) =
+        apply { bytes.forEach { insert(index, it.toHexString()) } }
+
+    fun filterByBigInteger(index: Int, vararg bigInt: BigInteger) =
+        apply { bigInt.forEach { insert(index, it.toString(16)) } }
 
     private fun insert(index: Int, hexString: String) = apply {
         val hex = HexData.fromHexString("0x${hexString.padStart(64, '0')}")
