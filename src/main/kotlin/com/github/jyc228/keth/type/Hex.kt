@@ -64,7 +64,10 @@ sealed class HexNumber<T, SELF : HexNumber<T, SELF>>(
     abstract operator fun compareTo(other: SELF): Int
     abstract operator fun plus(other: SELF): SELF
     abstract operator fun minus(other: SELF): SELF
-    override fun toString(): String = "$number | $hex"
+    override fun toString(): String {
+        if (lazyNumber.isInitialized()) return number.toString()
+        return with0x
+    }
 }
 
 @Serializable(HexIntSerializer::class)
