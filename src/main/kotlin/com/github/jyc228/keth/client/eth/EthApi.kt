@@ -90,6 +90,11 @@ interface EthApi {
         ref: BlockReference = BlockReference.latest
     ): ApiResult<AccountProof?>
 
+    suspend fun newFilter(request: GetLogsRequest): ApiResult<String>
+    suspend fun newFilter(init: GetLogsRequest.() -> Unit): ApiResult<String> = newFilter(GetLogsRequest().apply(init))
+    suspend fun uninstallFilter(filterId: String): ApiResult<Boolean>
+    suspend fun getFilterLogs(filterId: String): ApiResult<List<Log>>
+
     suspend fun getLogs(request: GetLogsRequest): ApiResult<List<Log>>
     suspend fun getBalance(address: Address, ref: BlockReference = BlockReference.latest): ApiResult<HexBigInt?>
     suspend fun getCode(address: Address, ref: BlockReference = BlockReference.latest): ApiResult<HexData?>

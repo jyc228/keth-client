@@ -107,6 +107,10 @@ class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(c
         ref: BlockReference
     ): ApiResult<AccountProof?> = "eth_getProof"(address, storageKeys, ref)
 
+    override suspend fun newFilter(request: GetLogsRequest): ApiResult<String> = "eth_newFilter"(request)
+    override suspend fun uninstallFilter(filterId: String): ApiResult<Boolean> = "eth_uninstallFilter"(filterId)
+    override suspend fun getFilterLogs(filterId: String): ApiResult<List<Log>> = "eth_getFilterLogs"(filterId)
+
     override suspend fun getLogs(request: GetLogsRequest): ApiResult<List<Log>> = "eth_getLogs"(request)
 
     override suspend fun getBalance(
