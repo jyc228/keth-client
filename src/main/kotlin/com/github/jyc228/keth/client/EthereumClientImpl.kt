@@ -1,6 +1,6 @@
 package com.github.jyc228.keth.client
 
-import com.github.jyc228.jsonrpc.KtorJsonRpcClient
+import com.github.jyc228.jsonrpc.JsonRpcClient
 import com.github.jyc228.keth.client.contract.ContractApi
 import com.github.jyc228.keth.client.contract.EthContractApi
 import com.github.jyc228.keth.client.engin.EngineApi
@@ -13,7 +13,7 @@ import kotlin.time.Duration
 import kotlinx.serialization.json.Json
 
 class DefaultEthereumClient(
-    private val client: KtorJsonRpcClient,
+    private val client: JsonRpcClient,
     private val json: Json
 ) : EthereumClient {
     private val immediateCall = ImmediateJsonRpcClient(client, json)
@@ -28,7 +28,7 @@ class DefaultEthereumClient(
 }
 
 class BatchEthereumClient(
-    client: KtorJsonRpcClient,
+    client: JsonRpcClient,
     contract: EthContractApi,
     json: Json
 ) : EthereumClient {
@@ -42,7 +42,7 @@ class BatchEthereumClient(
 }
 
 class ScheduledBatchEthereumClient(
-    client: KtorJsonRpcClient,
+    client: JsonRpcClient,
     interval: Duration,
     json: Json
 ) : EthereumClient {

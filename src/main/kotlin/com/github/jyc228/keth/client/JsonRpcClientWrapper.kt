@@ -1,7 +1,7 @@
 package com.github.jyc228.keth.client
 
+import com.github.jyc228.jsonrpc.JsonRpcClient
 import com.github.jyc228.jsonrpc.JsonRpcRequest
-import com.github.jyc228.jsonrpc.KtorJsonRpcClient
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.min
 import kotlin.time.Duration
@@ -17,17 +17,17 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 
-sealed class JsonRpcClient {
+sealed class JsonRpcClientWrapper {
     abstract suspend fun <T> send(
         method: String,
         params: JsonElement,
         resultSerializer: KSerializer<T>
     ): ApiResult<T>
 
-    abstract fun toImmediateClient(): JsonRpcClient
+    abstract fun toImmediateClient(): JsonRpcClientWrapper
 }
 
-class ImmediateJsonRpcClient(private val client: KtorJsonRpcClient, private val json: Json) : JsonRpcClient() {
+class ImmediateJsonRpcClient(private val client: JsonRpcClient, private val json: Json) : JsonRpcClientWrapper() {
     override suspend fun <T> send(
         method: String,
         params: JsonElement,
@@ -37,10 +37,11 @@ class ImmediateJsonRpcClient(private val client: KtorJsonRpcClient, private val 
         return ApiResult(client.send(request)) { json.decodeFromJsonElement(resultSerializer, it) }
     }
 
-    override fun toImmediateClient(): JsonRpcClient = this
+    override fun toImmediateClient(): JsonRpcClientWrapper = this
 }
 
-sealed class DeferredJsonRpcClient(protected val client: KtorJsonRpcClient, private val json: Json) : JsonRpcClient() {
+sealed class DeferredJsonRpcClient(protected val client: JsonRpcClient, private val json: Json) :
+    JsonRpcClientWrapper() {
     private val idGenerator = AtomicLong()
 
     override suspend fun <T> send(
@@ -64,10 +65,10 @@ sealed class DeferredJsonRpcClient(protected val client: KtorJsonRpcClient, priv
         }
     }
 
-    override fun toImmediateClient(): JsonRpcClient = ImmediateJsonRpcClient(client, json)
+    override fun toImmediateClient(): JsonRpcClientWrapper = ImmediateJsonRpcClient(client, json)
 }
 
-class BatchJsonRpcClient(client: KtorJsonRpcClient, json: Json) : DeferredJsonRpcClient(client, json) {
+class BatchJsonRpcClient(client: JsonRpcClient, json: Json) : DeferredJsonRpcClient(client, json) {
     @Suppress("UNCHECKED_CAST")
     suspend fun <T> execute(calls: List<ApiResult<T>>): List<ApiResult<T>> {
         executeAndSendResult(calls as List<DeferredApiResult<T>>)
@@ -76,7 +77,7 @@ class BatchJsonRpcClient(client: KtorJsonRpcClient, json: Json) : DeferredJsonRp
 }
 
 class ScheduledJsonRpcClient(
-    client: KtorJsonRpcClient,
+    client: JsonRpcClient,
     json: Json,
     private val interval: Duration,
     private val maxBatchSize: Int = 999

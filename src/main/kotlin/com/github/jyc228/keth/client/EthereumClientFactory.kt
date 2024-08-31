@@ -1,6 +1,6 @@
 package com.github.jyc228.keth.client
 
-import com.github.jyc228.jsonrpc.KtorJsonRpcClient
+import com.github.jyc228.jsonrpc.JsonRpcClient
 import com.github.jyc228.keth.type.UnknownTransactionSerializer
 import com.github.jyc228.keth.type.createEthSerializersModule
 import kotlin.time.Duration
@@ -21,7 +21,6 @@ fun EthereumClient.Companion.fromRpcUrl(
     initConfig: (EthereumClientConfig.() -> Unit)? = null
 ): EthereumClient {
     val config = EthereumClientConfig().apply { initConfig?.invoke(this) }
-    val client = KtorJsonRpcClient(url, config.adminJwtSecret)
     val json = Json {
         ignoreUnknownKeys = true
         classDiscriminator = ""
@@ -29,7 +28,7 @@ fun EthereumClient.Companion.fromRpcUrl(
         config.json?.invoke(this)
     }
     if (config.interval.isPositive()) {
-        return ScheduledBatchEthereumClient(client, config.interval, json)
+        return ScheduledBatchEthereumClient(JsonRpcClient.from(url, config.adminJwtSecret), config.interval, json)
     }
-    return DefaultEthereumClient(client, json)
+    return DefaultEthereumClient(JsonRpcClient.from(url, config.adminJwtSecret), json)
 }

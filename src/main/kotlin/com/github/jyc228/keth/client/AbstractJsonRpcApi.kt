@@ -7,7 +7,7 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
 
-abstract class AbstractJsonRpcApi(val client: JsonRpcClient) {
+abstract class AbstractJsonRpcApi(val client: JsonRpcClientWrapper) {
     protected suspend inline operator fun <reified T> String.invoke(): ApiResult<T> {
         return client.send(this, JsonNull, serializer())
     }

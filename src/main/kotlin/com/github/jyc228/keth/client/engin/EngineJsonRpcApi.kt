@@ -2,9 +2,9 @@ package com.github.jyc228.keth.client.engin
 
 import com.github.jyc228.keth.client.AbstractJsonRpcApi
 import com.github.jyc228.keth.client.ApiResult
-import com.github.jyc228.keth.client.JsonRpcClient
+import com.github.jyc228.keth.client.JsonRpcClientWrapper
 
-class EngineJsonRpcApi(client: JsonRpcClient) : EngineApi, AbstractJsonRpcApi(client) {
+class EngineJsonRpcApi(client: JsonRpcClientWrapper) : EngineApi, AbstractJsonRpcApi(client) {
     override suspend fun getPayloadV1(payloadId: PayloadId): ApiResult<ExecutionPayload> =
         "engine_getPayloadV1"(payloadId)
 

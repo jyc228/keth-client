@@ -2,7 +2,7 @@ package com.github.jyc228.keth.client.eth
 
 import com.github.jyc228.keth.client.AbstractJsonRpcApi
 import com.github.jyc228.keth.client.ApiResult
-import com.github.jyc228.keth.client.JsonRpcClient
+import com.github.jyc228.keth.client.JsonRpcClientWrapper
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.BlockReference
 import com.github.jyc228.keth.type.CallRequest
@@ -24,7 +24,7 @@ import org.web3j.crypto.Credentials
 import org.web3j.crypto.TransactionEncoder
 import org.web3j.utils.Numeric
 
-class EthJsonRpcApi(client: JsonRpcClient) : EthApi, AbstractJsonRpcApi(client) {
+class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(client) {
 
     override suspend fun chainId(): ApiResult<HexULong> = "eth_chainId"()
     override suspend fun gasPrice(): ApiResult<HexBigInt> = "eth_gasPrice"()

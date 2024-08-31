@@ -18,10 +18,13 @@ import io.ktor.serialization.kotlinx.json.json
 import java.util.Date
 
 // https://www.jsonrpc.org/
-class KtorJsonRpcClient(private val http: HttpClient, private val algorithm: Algorithm? = null) {
+internal class JsonRpcKtorHttpClient(
+    private val http: HttpClient,
+    private val algorithm: Algorithm? = null
+) : JsonRpcClient {
     constructor(url: String, jwtSecret: String? = null) : this(httpClient(url), hmac256(jwtSecret))
 
-    suspend fun send(request: JsonRpcRequest): JsonRpcResponse {
+    override suspend fun send(request: JsonRpcRequest): JsonRpcResponse {
         return http.post {
             jwtAuth()
             contentType(ContentType.Application.Json)
@@ -29,7 +32,7 @@ class KtorJsonRpcClient(private val http: HttpClient, private val algorithm: Alg
         }.body()
     }
 
-    suspend fun sendBatch(requests: List<JsonRpcRequest>): List<JsonRpcResponse> {
+    override suspend fun sendBatch(requests: List<JsonRpcRequest>): List<JsonRpcResponse> {
         return http.post {
             jwtAuth()
             contentType(ContentType.Application.Json)
