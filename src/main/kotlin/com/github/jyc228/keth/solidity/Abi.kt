@@ -1,7 +1,4 @@
-package com.github.jyc228.keth.abi
-
-import com.github.jyc228.keth.solidity.AbiInput
-import com.github.jyc228.keth.solidity.AbiItem
+package com.github.jyc228.keth.solidity
 
 interface Abi {
     fun decodeLog(inputs: List<AbiInput>, hex: String, topics: List<String>): Map<String, Any>

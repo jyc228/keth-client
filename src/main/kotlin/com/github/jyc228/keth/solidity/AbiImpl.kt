@@ -1,7 +1,5 @@
-package com.github.jyc228.keth.abi
+package com.github.jyc228.keth.solidity
 
-import com.github.jyc228.keth.solidity.AbiInput
-import com.github.jyc228.keth.solidity.AbiItem
 import java.nio.ByteBuffer
 
 object AbiImpl : Abi {

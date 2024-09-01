@@ -1,8 +1,8 @@
 package com.github.jyc228.keth.contract
 
-import com.github.jyc228.keth.abi.Abi
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
+import com.github.jyc228.keth.solidity.Abi
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.GetLogsRequest

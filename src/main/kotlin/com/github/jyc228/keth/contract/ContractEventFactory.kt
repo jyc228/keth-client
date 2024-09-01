@@ -1,7 +1,7 @@
 package com.github.jyc228.keth.contract
 
-import com.github.jyc228.keth.abi.Abi
 import com.github.jyc228.keth.contract.Contract.GetEventRequest
+import com.github.jyc228.keth.solidity.Abi
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexData

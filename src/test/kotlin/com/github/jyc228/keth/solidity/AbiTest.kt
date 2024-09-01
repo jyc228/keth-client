@@ -1,6 +1,5 @@
-package com.github.jyc228.keth.abi
+package com.github.jyc228.keth.solidity
 
-import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Address
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
