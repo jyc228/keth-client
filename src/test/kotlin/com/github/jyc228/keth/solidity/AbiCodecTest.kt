@@ -10,7 +10,7 @@ import java.math.BigInteger
 import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalStdlibApi::class)
-internal class AbiTest : DescribeSpec({
+internal class AbiCodecTest : DescribeSpec({
 
     context("decodeLog") {
         it("TransactionBatchAppended") {

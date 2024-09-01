@@ -59,6 +59,8 @@ data class PrimitiveType(override val name: String, override val size: Int?) : T
 }
 
 data class ArrayType(override val name: String, override val size: Int?, val elementType: Type) : Type {
+    constructor(name: String, size: Int? = null, typeName: String) : this(name, size, Type.of(typeName))
+
     override val dynamic: Boolean get() = size == null
     override fun toString(): String = "$name[${size ?: ""}]"
 }
