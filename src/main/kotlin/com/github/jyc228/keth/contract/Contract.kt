@@ -2,7 +2,7 @@ package com.github.jyc228.keth.contract
 
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
-import com.github.jyc228.keth.solidity.Abi
+import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.GetLogsRequest
@@ -22,7 +22,7 @@ interface Contract<ROOT_EVENT : ContractEvent> {
     abstract class Factory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
         protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
             val abi: AbiItem = Json.decodeFromString(jsonAbi)
-            return Abi.encodeParameters(abi.inputs.map { it.type }, args.toList()).removePrefix("0x")
+            return AbiCodec.encodeParameters(abi.inputs.map { it.type }, args.toList()).removePrefix("0x")
         }
     }
 

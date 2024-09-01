@@ -26,7 +26,7 @@ internal class AbiTest : DescribeSpec({
                 "0x000000000000000000000000000000000000000000000000000000000003ad3b"
             )
 
-            val result = Abi.decodeLog(abi.inputs, hex, topics)
+            val result = AbiCodec.decodeLog(abi.inputs, hex, topics)
 
             result["_batchIndex"].shouldBeInstanceOf<BigInteger>() shouldBe 240955.toBigInteger()
             result["_batchRoot"].shouldBeInstanceOf<ByteArray>()
@@ -50,7 +50,7 @@ internal class AbiTest : DescribeSpec({
                 "0x0000000000000000000000002b8a6034c83706aacc846ddc4a2c8e943c09ae44",
             )
 
-            val result = Abi.decodeLog(abi.inputs, hex, topics)
+            val result = AbiCodec.decodeLog(abi.inputs, hex, topics)
 
             result["from"].shouldBeInstanceOf<Address>().hex shouldBeEqualIgnoringCase "Cb983A3178aD960d8ED7288cD9D66c6B4b2B5F66"
             result["to"].shouldBeInstanceOf<Address>().hex shouldBeEqualIgnoringCase "2b8A6034c83706aacC846ddc4a2c8E943C09aE44"
@@ -66,7 +66,7 @@ internal class AbiTest : DescribeSpec({
             val hex =
                 "0x015d8eb9000000000000000000000000000000000000000000000000000000000006cf4900000000000000000000000000000000000000000000000000000000639833b0000000000000000000000000000000000000000000000000000000000000000751c54ac1869a3f078ff0aa2994f27f6aceb5d2bda18ec30f2593fa20d9c052fa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016cb0a409497493c2ef7688f69534fd8f8f23b74000000000000000000000000000000000000000000000000000000000000083400000000000000000000000000000000000000000000000000000000000f4240"
 
-            val result = Abi.decodeParameters(abi.inputs.map { it.type }, hex.drop(10))
+            val result = AbiCodec.decodeParameters(abi.inputs.map { it.type }, hex.drop(10))
 
             result[0].shouldBeInstanceOf<BigInteger>() shouldBe 446281.toBigInteger()
             result[1].shouldBeInstanceOf<BigInteger>() shouldBe 1670919088.toBigInteger()

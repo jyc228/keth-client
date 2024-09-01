@@ -2,7 +2,7 @@ package com.github.jyc228.keth.solidity
 
 import java.nio.ByteBuffer
 
-object AbiImpl : Abi {
+object AbiCodecImpl : AbiCodec {
     override fun decodeLog(inputs: List<AbiInput>, hex: String, topics: List<String>): Map<String, Any> {
         val types = inputs.fold(LogTypes()) { types, abi -> types.add(abi) }
         val indexedResult = types.indexed.mapIndexed { i, t -> Codec.decode(t, topics[i + 1]) }.iterator()

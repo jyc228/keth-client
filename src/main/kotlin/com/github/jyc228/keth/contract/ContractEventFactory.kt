@@ -1,7 +1,7 @@
 package com.github.jyc228.keth.contract
 
 import com.github.jyc228.keth.contract.Contract.GetEventRequest
-import com.github.jyc228.keth.solidity.Abi
+import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexData
@@ -31,7 +31,7 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
         topics: List<HexData> = emptyList()
     ): EVENT {
         requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
-        val resultByName = Abi.decodeLog(abi.inputs, data.hex, topics.map { it.hex })
+        val resultByName = AbiCodec.decodeLog(abi.inputs, data.hex, topics.map { it.hex })
         val params = const.parameters.associateWith { p -> resultByName[p.name] }
         return const.callBy(params)
     }
