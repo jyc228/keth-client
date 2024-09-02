@@ -1,6 +1,5 @@
 package com.github.jyc228.keth.solidity
 
-import com.github.jyc228.keth.type.Address
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -52,8 +51,8 @@ internal class AbiCodecTest : DescribeSpec({
 
             val result = AbiCodec.decodeLog(abi.inputs, hex, topics)
 
-            result["from"].shouldBeInstanceOf<Address>().hex shouldBeEqualIgnoringCase "Cb983A3178aD960d8ED7288cD9D66c6B4b2B5F66"
-            result["to"].shouldBeInstanceOf<Address>().hex shouldBeEqualIgnoringCase "2b8A6034c83706aacC846ddc4a2c8E943C09aE44"
+            result["from"].shouldBeInstanceOf<String>() shouldBeEqualIgnoringCase "0xCb983A3178aD960d8ED7288cD9D66c6B4b2B5F66"
+            result["to"].shouldBeInstanceOf<String>() shouldBeEqualIgnoringCase "0x2b8A6034c83706aacC846ddc4a2c8E943C09aE44"
             result["value"].shouldBeInstanceOf<BigInteger>() shouldBe 60220000.toBigInteger()
         }
     }

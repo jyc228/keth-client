@@ -1,6 +1,5 @@
 package com.github.jyc228.keth.solidity
 
-import com.github.jyc228.keth.type.Address
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.core.spec.style.scopes.ContainerScope
 import io.kotest.datatest.withData
@@ -20,9 +19,9 @@ class CodecTest : DescribeSpec({
         }
 
         context("decode") {
-            decodeTest({ it.shouldBeInstanceOf<Address>().hex }) {
-                "000000000000000000000000e6004226bc1f1ba37e5c2c4689693b94b863cd58" decode "address".type shouldBe "e6004226bc1f1ba37e5c2c4689693b94b863cd58"
-                "000000000000000000000000e6004226bc1f1ba37e5c2c4689693b94b863cd580000000000000000000000000000000000000000000000000000000000000001" decode "address".type shouldBe "e6004226bc1f1ba37e5c2c4689693b94b863cd58" withRemaining "0000000000000000000000000000000000000000000000000000000000000001"
+            decodeTest({ it.shouldBeInstanceOf<String>() }) {
+                "000000000000000000000000e6004226bc1f1ba37e5c2c4689693b94b863cd58" decode "address".type shouldBe "0xe6004226bc1f1ba37e5c2c4689693b94b863cd58"
+                "000000000000000000000000e6004226bc1f1ba37e5c2c4689693b94b863cd580000000000000000000000000000000000000000000000000000000000000001" decode "address".type shouldBe "0xe6004226bc1f1ba37e5c2c4689693b94b863cd58" withRemaining "0000000000000000000000000000000000000000000000000000000000000001"
             }
         }
     }

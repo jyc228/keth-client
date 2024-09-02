@@ -1,6 +1,8 @@
 package com.github.jyc228.keth.client
 
 import com.github.jyc228.jsonrpc.JsonRpcClient
+import com.github.jyc228.keth.solidity.AbiCodec
+import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.UnknownTransactionSerializer
 import com.github.jyc228.keth.type.createEthSerializersModule
 import kotlin.time.Duration
@@ -27,6 +29,7 @@ fun EthereumClient.Companion.fromRpcUrl(
         serializersModule += createEthSerializersModule(config.unknownTransactionSerializer)
         config.json?.invoke(this)
     }
+    AbiCodec.registerPrimitiveTypeConverter("address") { Address.fromHexString(it.toString()) }
     if (config.interval.isPositive()) {
         return ScheduledBatchEthereumClient(JsonRpcClient.from(url, config.adminJwtSecret), config.interval, json)
     }
