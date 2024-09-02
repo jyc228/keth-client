@@ -1,6 +1,5 @@
 package com.github.jyc228.keth.solidity
 
-import com.github.jyc228.keth.type.Address
 import java.math.BigInteger
 import java.nio.ByteBuffer
 import kotlin.math.ceil
@@ -11,6 +10,21 @@ sealed interface Codec {
     fun decode(type: Type, buffer: ByteBuffer): Any
 
     companion object : Codec {
+        private val primitiveTypeCodec = mutableMapOf<String, Codec>().apply {
+            this["string"] = StringCodec
+            this["bool"] = BooleanCodec
+            this["address"] = AddressCodec
+            this["bytes"] = BytesCodec
+            this["int"] = NumberCodec
+            this["uint"] = NumberCodec
+        }
+
+        fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
+            val codec = primitiveTypeCodec[typeName] ?: error { "unsupported type $typeName" }
+            if (codec is CustomCodec) return
+            primitiveTypeCodec[typeName] = CustomCodec(codec, converter)
+        }
+
         fun encode(type: Type, data: Any?): ByteArray {
             return ByteBuffer.allocate(computeEncodeSize(type, data)).also { encode(type, data, it) }.array()
         }
@@ -24,20 +38,16 @@ sealed interface Codec {
         override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = selectCodec(type).encode(type, data, buffer)
         override fun decode(type: Type, buffer: ByteBuffer): Any = selectCodec(type).decode(type, buffer)
 
-        private fun selectCodec(type: Type): Codec {
-            if (type is ArrayType) return ArrayCodec
-            return when (type.name) {
-                "string" -> StringCodec
-                "bool" -> BooleanCodec
-                "address" -> AddressCodec
-                "tuple" -> TupleCodec
-                "bytes" -> BytesCodec
-                "int" -> NumberCodec
-                "uint" -> NumberCodec
-                else -> error { "unsupported type $type" }
-            }
+        private fun selectCodec(type: Type): Codec = when (type) {
+            is ArrayType -> ArrayCodec
+            is TupleType -> TupleCodec
+            is PrimitiveType -> primitiveTypeCodec[type.name] ?: error { "unsupported type $type" }
         }
     }
+}
+
+class CustomCodec(private val codec: Codec, private val converter: (Any) -> Any) : Codec by codec {
+    override fun decode(type: Type, buffer: ByteBuffer): Any = converter(codec.decode(type, buffer))
 }
 
 data object BooleanCodec : Codec {
@@ -194,12 +204,12 @@ data object AddressCodec : Codec {
         buffer.position(12).putHexString(address)
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): Address = decode(buffer)
+    override fun decode(type: Type, buffer: ByteBuffer): String = decode(buffer)
 
     @OptIn(ExperimentalStdlibApi::class)
-    fun decode(data: ByteBuffer): Address {
+    fun decode(data: ByteBuffer): String {
         repeat(12) { require(data.get() == 0.toByte()) }
-        return Address.fromHexString(ByteArray(20).also { data.get(it) }.toHexString().lowercase())
+        return "0x${ByteArray(20).also { data.get(it) }.toHexString().lowercase()}"
     }
 }
 

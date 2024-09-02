@@ -34,6 +34,10 @@ object AbiCodecImpl : AbiCodec {
         TODO("Not yet implemented")
     }
 
+    override fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
+        Codec.registerPrimitiveTypeConverter(typeName, converter)
+    }
+
     private data class LogTypes(
         val indexed: MutableList<Type> = mutableListOf(),
         val nonIndexed: MutableList<Type> = mutableListOf()
