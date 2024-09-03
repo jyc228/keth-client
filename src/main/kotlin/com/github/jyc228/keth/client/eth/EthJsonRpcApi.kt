@@ -110,6 +110,8 @@ class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(c
     override suspend fun newFilter(request: GetLogsRequest): ApiResult<String> = "eth_newFilter"(request)
     override suspend fun uninstallFilter(filterId: String): ApiResult<Boolean> = "eth_uninstallFilter"(filterId)
     override suspend fun getFilterLogs(filterId: String): ApiResult<List<Log>> = "eth_getFilterLogs"(filterId)
+    override suspend fun <T> getFilterChanges(filterId: FilterId<T>): ApiResult<List<T>> =
+        "eth_getFilterChanges"(filterId.id, filterId.serializer)
 
     override suspend fun getLogs(request: GetLogsRequest): ApiResult<List<Log>> = "eth_getLogs"(request)
 

@@ -12,9 +12,12 @@ abstract class AbstractJsonRpcApi(val client: JsonRpcClientWrapper) {
         return client.send(this, JsonNull, serializer())
     }
 
-    protected suspend inline operator fun <reified T, reified P1> String.invoke(p1: P1): ApiResult<T> {
+    protected suspend inline operator fun <reified T, reified P1> String.invoke(
+        p1: P1,
+        serializer: KSerializer<T> = serializer()
+    ): ApiResult<T> {
         val inputs = listOf(Json.encodeToJsonElement(p1))
-        return client.send(this, JsonArray(inputs), serializer())
+        return client.send(this, JsonArray(inputs), serializer)
     }
 
     protected suspend inline operator fun <reified T, reified P1, reified P2> String.invoke(
