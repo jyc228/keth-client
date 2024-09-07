@@ -22,8 +22,7 @@ class Deployment(
     val transactionHash: String,
     val userdoc: Doc
 ) {
-    val metadataObject: Metadata = Json { ignoreUnknownKeys = true }.decodeFromString(metadata)
-
+    val metadataObject: Metadata = json.decodeFromString(metadata)
 
     @Serializable
     data class StorageLayout(
@@ -40,4 +39,8 @@ class Deployment(
         val slot: String,
         val type: String
     )
+
+    companion object {
+        private val json = Json { ignoreUnknownKeys = true }
+    }
 }
