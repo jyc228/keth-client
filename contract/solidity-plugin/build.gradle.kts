@@ -22,5 +22,3 @@ gradlePlugin {
         }
     }
 }
-
-publishing(createGPRPublisher { artifactId = "solidity-plugin" })
