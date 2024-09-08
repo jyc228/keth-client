@@ -22,3 +22,5 @@ gradlePlugin {
         }
     }
 }
+
+publishing { repositories { gprKethClient() } }
