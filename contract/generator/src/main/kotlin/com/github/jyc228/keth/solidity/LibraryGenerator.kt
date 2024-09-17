@@ -7,11 +7,11 @@ import com.github.jyc228.kotlin.codegen.TypeBuilder
 class LibraryGenerator(
     val packagePath: String,
     val abiIOByName: MutableMap<String, AbiComponent> = mutableMapOf()
-) : SolidityCodeGen() {
+) {
     val generated = mutableSetOf<String>()
     fun generate(fileName: String, objectName: String?): KtFileBuilder {
         return KtFileBuilder(
-            GenerationContext { it.importPackagePath },
+            GenerationContext.new(),
             fileName,
             packagePath
         ).apply {

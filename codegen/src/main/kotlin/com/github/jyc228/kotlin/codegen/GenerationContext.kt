@@ -9,4 +9,6 @@ class GenerationContext(private val toFullName: (String) -> String) {
     }
 
     fun fullPaths() = reportedTypes.asSequence().sorted().map(toFullName).filter { it.isNotBlank() }
+
+    companion object
 }

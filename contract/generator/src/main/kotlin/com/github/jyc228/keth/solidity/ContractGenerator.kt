@@ -12,9 +12,9 @@ import kotlinx.serialization.json.Json
 class ContractGenerator(
     val packagePath: String,
     val compileResult: CompileResult,
-) : SolidityCodeGen() {
+) {
     fun generateInterface() = KtFileBuilder(
-        context = GenerationContext { it.importPackagePath },
+        context = GenerationContext.new(),
         name = compileResult.contractName,
         packagePath = packagePath
     ).apply { type().buildContractInterface(compileResult.contractName) }
@@ -115,7 +115,7 @@ class ContractGenerator(
     }
 
     fun generateDefaultImplementation() = KtFileBuilder(
-        context = GenerationContext { it.importPackagePath },
+        context = GenerationContext.new(),
         name = "${compileResult.contractName}Impl",
         packagePath = packagePath
     ).apply { type().buildContractInterfaceImplementation(compileResult.contractName) }
