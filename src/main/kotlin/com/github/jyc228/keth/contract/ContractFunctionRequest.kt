@@ -18,7 +18,7 @@ interface ContractFunctionRequest<R> {
     ): ApiResult<Hash>
 
     interface CallBuilder {
-        var from: String?
+        var from: Address?
         var gasPrice: HexBigInt?
         var gasLimit: HexBigInt?
         var value: HexBigInt?
@@ -45,7 +45,7 @@ class EthContractFunctionRequest<R>(
 ) : ContractFunctionRequest<R>,
     ContractFunctionRequest.CallBuilder,
     ContractFunctionRequest.TransactionBuilder {
-    override var from: String? = null
+    override var from: Address? = null
     override var gasLimit: HexBigInt? = null
     override var gasPrice: HexBigInt? = null
     override var value: HexBigInt? = null
@@ -60,12 +60,12 @@ class EthContractFunctionRequest<R>(
         val builder: ContractFunctionRequest.CallBuilder = this.apply { build() }
         val result = eth.call(
             CallRequest(
-                data = data,
-                to = contractAddress.hex,
                 from = builder.from,
+                to = contractAddress,
                 gas = builder.gasLimit,
                 gasPrice = builder.gasPrice,
                 value = builder.value,
+                data = data,
             ),
             targetBlock
         )

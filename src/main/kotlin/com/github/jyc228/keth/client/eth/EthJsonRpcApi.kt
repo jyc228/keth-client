@@ -147,8 +147,8 @@ class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(c
         if (tx.gasLimit.number == BigInteger.ZERO && (tx.input != "" && tx.input != "0x")) {
             tx.gasLimit = client.estimateGas(
                 CallRequest(
-                    from = account.address.hex,
-                    to = tx.to?.hex,
+                    from = account.address,
+                    to = tx.to,
                     gasPrice = tx.gasPrice,
                     data = tx.input,
                     value = tx.value
