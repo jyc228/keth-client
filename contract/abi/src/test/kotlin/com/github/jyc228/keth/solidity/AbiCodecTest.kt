@@ -2,6 +2,7 @@ package com.github.jyc228.keth.solidity
 
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
+import io.kotest.matchers.maps.shouldHaveSize
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldBeEqualIgnoringCase
 import io.kotest.matchers.types.shouldBeInstanceOf
@@ -77,6 +78,26 @@ internal class AbiCodecTest : DescribeSpec({
                 .toHexString() shouldBeEqualIgnoringCase "00000000000000000000000016cb0a409497493c2ef7688f69534fd8f8f23b74"
             result[6].shouldBeInstanceOf<BigInteger>() shouldBe 2100.toBigInteger()
             result[7].shouldBeInstanceOf<BigInteger>() shouldBe 1000000.toBigInteger()
+        }
+
+        it("exactInputSingle") {
+            // https://etherscan.io/tx/0xff88cc410593c399697faf3ac6c4debbba05ef81ecd1843d18c4ef51e0214bdd
+            val abi =
+                Json.decodeFromString<AbiItem>("""{"inputs":[{"components":[{"internalType":"address","name":"tokenIn","type":"address"},{"internalType":"address","name":"tokenOut","type":"address"},{"internalType":"uint24","name":"fee","type":"uint24"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint256","name":"amountIn","type":"uint256"},{"internalType":"uint256","name":"amountOutMinimum","type":"uint256"},{"internalType":"uint160","name":"sqrtPriceLimitX96","type":"uint160"}],"internalType":"struct ISwapRouter.ExactInputSingleParams","name":"params","type":"tuple"}],"name":"exactInputSingle","outputs":[{"internalType":"uint256","name":"amountOut","type":"uint256"}],"stateMutability":"payable","type":"function"}""")
+
+            val hex =
+                "0x414bf389000000000000000000000000626e8036deb333b408be468f951bdb42433cbf18000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000009c4000000000000000000000000b1b2d032aa2f52347fbcfd08e5c3cc55216e84040000000000000000000000000000000000000000000000000000000066eae2d90000000000000000000000000000000000000000000002ac2d322ac7ef76e4000000000000000000000000000000000000000000000000001c73c927940973000000000000000000000000000000000000000000000000000000000000000000"
+            val result = AbiCodec.decode(abi.inputs, hex.drop(10))
+            result shouldHaveSize 1
+            val params = result["params"].shouldBeInstanceOf<Map<String, *>>()
+            params["tokenIn"] shouldBe "0x626E8036dEB333b408Be468F951bdB42433cBF18".lowercase()
+            params["tokenOut"] shouldBe "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".lowercase()
+            params["fee"] shouldBe "2500".toBigInteger()
+            params["recipient"] shouldBe "0xb1b2d032AA2F52347fbcfd08E5C3Cc55216E8404".lowercase()
+            params["deadline"] shouldBe "1726669529".toBigInteger()
+            params["amountIn"] shouldBe "12620829658936080000000".toBigInteger()
+            params["amountOutMinimum"] shouldBe "2050203427208262400".toBigInteger()
+            params["sqrtPriceLimitX96"] shouldBe "0".toBigInteger()
         }
     }
 })

@@ -3,6 +3,20 @@ package com.github.jyc228.keth.solidity
 import java.nio.ByteBuffer
 
 object AbiCodecImpl : AbiCodec {
+    override fun decode(components: List<AbiComponent>, hex: String): Map<String, Any> {
+        val result = TupleCodec.decode(components.toTupleType(), hexToByteBuffer(hex))
+        return convertToMap(components, result)
+    }
+
+    private fun convertToMap(components: List<AbiComponent>, result: List<*>): Map<String, Any> {
+        return components.withIndex().associateBy({ (_, c) -> c.name }, { (i, c) ->
+            when (c.type) {
+                "tuple" -> convertToMap(c.components, result[i] as List<*>)
+                else -> result[i] as Any
+            }
+        })
+    }
+
     override fun decodeLog(inputs: List<AbiInput>, hex: String, topics: List<String>): Map<String, Any> {
         val types = inputs.fold(LogTypes()) { types, abi -> types.add(abi) }
         val indexedResult = types.indexed.mapIndexed { i, t -> Codec.decode(t, topics[i + 1]) }.iterator()
@@ -37,6 +51,8 @@ object AbiCodecImpl : AbiCodec {
     override fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
         Codec.registerPrimitiveTypeConverter(typeName, converter)
     }
+
+    private fun List<AbiComponent>.toTupleType() = TupleType(map { Type.of(it.encodeType()) })
 
     private data class LogTypes(
         val indexed: MutableList<Type> = mutableListOf(),
