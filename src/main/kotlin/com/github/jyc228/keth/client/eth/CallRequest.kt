@@ -1,5 +1,7 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.Address
+import com.github.jyc228.keth.type.HexBigInt
 import kotlinx.serialization.Serializable
 
 @Serializable

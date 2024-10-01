@@ -1,5 +1,6 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.createEthSerializersModule
 import io.kotest.matchers.resource.resourceAsString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

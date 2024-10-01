@@ -1,11 +1,11 @@
 package com.github.jyc228.keth.contract
 
 import com.github.jyc228.keth.client.ApiResult
+import com.github.jyc228.keth.client.eth.Access
+import com.github.jyc228.keth.client.eth.BlockReference
+import com.github.jyc228.keth.client.eth.CallRequest
 import com.github.jyc228.keth.client.eth.EthApi
-import com.github.jyc228.keth.type.Access
 import com.github.jyc228.keth.type.Address
-import com.github.jyc228.keth.type.BlockReference
-import com.github.jyc228.keth.type.CallRequest
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexBigInt
 import com.github.jyc228.keth.type.HexULong

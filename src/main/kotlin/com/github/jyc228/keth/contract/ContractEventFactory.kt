@@ -1,11 +1,11 @@
 package com.github.jyc228.keth.contract
 
+import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.contract.Contract.GetEventRequest
 import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexData
-import com.github.jyc228.keth.type.Topics
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 import kotlinx.serialization.json.Json

@@ -1,5 +1,13 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.Address
+import com.github.jyc228.keth.type.Hash
+import com.github.jyc228.keth.type.HexBigInt
+import com.github.jyc228.keth.type.HexData
+import com.github.jyc228.keth.type.HexInt
+import com.github.jyc228.keth.type.HexULong
+import com.github.jyc228.keth.type.TransactionHashesSerializer
+import com.github.jyc228.keth.type.TransactionObjectsSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 

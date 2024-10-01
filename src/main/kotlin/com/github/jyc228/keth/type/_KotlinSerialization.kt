@@ -1,5 +1,11 @@
 package com.github.jyc228.keth.type
 
+import com.github.jyc228.keth.client.eth.RpcTransaction
+import com.github.jyc228.keth.client.eth.Transaction
+import com.github.jyc228.keth.client.eth.TransactionHashes
+import com.github.jyc228.keth.client.eth.TransactionObjects
+import com.github.jyc228.keth.client.eth.TransactionStatus
+import com.github.jyc228.keth.client.eth.TransactionType
 import kotlinx.datetime.Instant
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.KSerializer
