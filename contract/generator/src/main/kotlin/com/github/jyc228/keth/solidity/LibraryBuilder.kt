@@ -4,14 +4,14 @@ import com.github.jyc228.kotlin.codegen.GenerationContext
 import com.github.jyc228.kotlin.codegen.KtFileBuilder
 import com.github.jyc228.kotlin.codegen.TypeBuilder
 
-class LibraryGenerator(
+class LibraryBuilder(
     val packagePath: String,
     val abiIOByName: MutableMap<String, AbiComponent> = mutableMapOf()
-) : SolidityCodeGen() {
+) {
     val generated = mutableSetOf<String>()
-    fun generate(fileName: String, objectName: String?): KtFileBuilder {
+    fun build(fileName: String, objectName: String?): KtFileBuilder {
         return KtFileBuilder(
-            GenerationContext { it.importPackagePath },
+            GenerationContext.new(),
             fileName,
             packagePath
         ).apply {
