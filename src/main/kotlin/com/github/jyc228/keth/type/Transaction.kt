@@ -97,7 +97,7 @@ sealed class TransactionType(val value: Int, override val hex: String) : HexStri
 sealed class TransactionStatus(val value: Int, override val hex: String) : HexString() {
     data object Fail : TransactionStatus(0, "0x0")
     data object Success : TransactionStatus(1, "0x1")
-    class Unknown(hex: String) : TransactionStatus(hex.hexToInt(), hex)
+    class Unknown(hex: String) : TransactionStatus(hex.hexToInt(), hex.removePrefix("0x"))
 
     companion object {
         fun from(hex: String): TransactionStatus = Fail.takeIf { it.hex == hex }
