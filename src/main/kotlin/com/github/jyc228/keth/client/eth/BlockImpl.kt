@@ -65,11 +65,7 @@ data class RpcBlock<T : Transactions>(
     override val parentBeaconBlockRoot: Hash? = null,
     override val blobGasUsed: HexBigInt? = null,
     override val excessBlobGas: HexBigInt? = null,
-) : Block<T> {
-    override fun toString(): String {
-        return "number=${number} hash=${hash} parentHash=${parentHash} timestamp=${timestamp} txCount=${transactions.hashes.size}"
-    }
-}
+) : Block<T>
 
 @Serializable
 data class RpcUncleBlock(
@@ -99,9 +95,5 @@ data class RpcUncleBlock(
     override val parentBeaconBlockRoot: Hash? = null,
     override val blobGasUsed: HexBigInt? = null,
     override val excessBlobGas: HexBigInt? = null,
-) : UncleBlock {
-    override fun toString(): String {
-        return "number=${number} hash=${hash} parentHash=${parentHash} timestamp=${timestamp}"
-    }
-}
+) : UncleBlock
 
