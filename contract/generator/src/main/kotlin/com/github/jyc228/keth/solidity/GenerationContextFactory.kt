@@ -11,7 +11,7 @@ internal fun GenerationContext.Companion.new() = GenerationContext {
         "HexInt" -> "com.github.jyc228.keth.type.HexInt"
         "HexULong" -> "com.github.jyc228.keth.type.HexULong"
         "HexBigInt" -> "com.github.jyc228.keth.type.HexBigInt"
-        "Topics" -> "com.github.jyc228.keth.type.Topics"
+        "Topics" -> "com.github.jyc228.keth.client.eth.Topics"
 
         "Indexed" -> "com.github.jyc228.keth.contract.Indexed"
         "@Indexed" -> "com.github.jyc228.keth.contract.Indexed"

@@ -1,4 +1,4 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
 import io.kotest.assertions.throwables.shouldThrowAny
 import io.kotest.core.spec.style.StringSpec

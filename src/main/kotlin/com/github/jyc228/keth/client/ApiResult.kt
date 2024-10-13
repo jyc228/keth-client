@@ -21,7 +21,7 @@ fun <T> ApiResult(
     return ApiResultSuccess(decode(response.result))
 }
 
-interface ApiResult<T> {
+interface ApiResult<out T> {
     suspend fun awaitOrNull(): T?
     suspend fun awaitOrThrow(): T
 

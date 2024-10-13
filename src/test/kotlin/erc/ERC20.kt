@@ -1,5 +1,6 @@
 package erc
 
+import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.contract.Contract
 import com.github.jyc228.keth.contract.ContractEvent
 import com.github.jyc228.keth.contract.ContractEventFactory
@@ -9,7 +10,6 @@ import com.github.jyc228.keth.contract.ContractFunctionP2
 import com.github.jyc228.keth.contract.ContractFunctionP3
 import com.github.jyc228.keth.contract.ContractFunctionRequest
 import com.github.jyc228.keth.type.Address
-import com.github.jyc228.keth.type.Topics
 import java.math.BigInteger
 
 interface ERC20 : Contract<ERC20.Event> {

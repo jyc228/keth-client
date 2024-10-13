@@ -1,6 +1,5 @@
 package com.github.jyc228.keth.client.eth
 
-import com.github.jyc228.keth.type.Access
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexBigInt

@@ -1,8 +1,8 @@
 package com.github.jyc228.keth.client.txpool
 
+import com.github.jyc228.keth.client.eth.RpcTransaction
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.HexInt
-import com.github.jyc228.keth.type.RpcTransaction
 import kotlinx.serialization.Serializable
 
 @Serializable

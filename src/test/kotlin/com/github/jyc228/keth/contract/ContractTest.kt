@@ -1,6 +1,6 @@
 package com.github.jyc228.keth.contract
 
-import com.github.jyc228.keth.type.GetLogsRequest
+import com.github.jyc228.keth.client.eth.GetLogsRequest
 import erc.ERC20
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize

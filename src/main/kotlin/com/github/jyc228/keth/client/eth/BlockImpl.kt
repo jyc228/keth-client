@@ -1,5 +1,11 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.Address
+import com.github.jyc228.keth.type.Hash
+import com.github.jyc228.keth.type.HexBigInt
+import com.github.jyc228.keth.type.HexData
+import com.github.jyc228.keth.type.HexULong
+import com.github.jyc228.keth.type.InstantSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -59,11 +65,7 @@ data class RpcBlock<T : Transactions>(
     override val parentBeaconBlockRoot: Hash? = null,
     override val blobGasUsed: HexBigInt? = null,
     override val excessBlobGas: HexBigInt? = null,
-) : Block<T> {
-    override fun toString(): String {
-        return "number=${number} hash=${hash} parentHash=${parentHash} timestamp=${timestamp} txCount=${transactions.hashes.size}"
-    }
-}
+) : Block<T>
 
 @Serializable
 data class RpcUncleBlock(
@@ -93,9 +95,5 @@ data class RpcUncleBlock(
     override val parentBeaconBlockRoot: Hash? = null,
     override val blobGasUsed: HexBigInt? = null,
     override val excessBlobGas: HexBigInt? = null,
-) : UncleBlock {
-    override fun toString(): String {
-        return "number=${number} hash=${hash} parentHash=${parentHash} timestamp=${timestamp}"
-    }
-}
+) : UncleBlock
 

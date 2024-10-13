@@ -1,9 +1,5 @@
 package com.github.jyc228.keth
 
-import com.fasterxml.jackson.core.JsonGenerator
-import com.fasterxml.jackson.databind.JsonSerializer
-import com.fasterxml.jackson.databind.SerializerProvider
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import java.lang.ref.WeakReference
 import java.math.BigInteger
 import java.math.RoundingMode
@@ -15,7 +11,6 @@ val Long.wei get() = wei(this)
 val BigInteger.wei get() = wei(this)
 
 @JvmInline
-@JsonSerialize(using = Serializer::class)
 value class Wei(val v: BigInteger) {
     operator fun plus(wei: Wei) = Wei(v + wei.v)
     operator fun minus(wei: Wei) = Wei(v - wei.v)
@@ -39,12 +34,6 @@ value class Wei(val v: BigInteger) {
     companion object {
         val ONE_GWEI = Wei(1000000000.toBigInteger())
         val ONE_ETH = Wei(1000000000000000000.toBigInteger())
-    }
-}
-
-private class Serializer : JsonSerializer<Wei>() {
-    override fun serialize(value: Wei, gen: JsonGenerator, serializers: SerializerProvider) {
-        gen.writeString(value.v.toString())
     }
 }
 

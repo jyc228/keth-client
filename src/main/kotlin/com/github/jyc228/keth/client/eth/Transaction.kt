@@ -1,5 +1,14 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.Address
+import com.github.jyc228.keth.type.Hash
+import com.github.jyc228.keth.type.HexBigInt
+import com.github.jyc228.keth.type.HexInt
+import com.github.jyc228.keth.type.HexString
+import com.github.jyc228.keth.type.HexULong
+import com.github.jyc228.keth.type.TransactionStatusSerializer
+import com.github.jyc228.keth.type.TransactionTypeSerializer
+import com.github.jyc228.keth.type.hexToInt
 import java.math.BigInteger
 import kotlinx.serialization.Serializable
 
@@ -97,7 +106,7 @@ sealed class TransactionType(val value: Int, override val hex: String) : HexStri
 sealed class TransactionStatus(val value: Int, override val hex: String) : HexString() {
     data object Fail : TransactionStatus(0, "0x0")
     data object Success : TransactionStatus(1, "0x1")
-    class Unknown(hex: String) : TransactionStatus(hex.hexToInt(), hex)
+    class Unknown(hex: String) : TransactionStatus(hex.hexToInt(), hex.removePrefix("0x"))
 
     companion object {
         fun from(hex: String): TransactionStatus = Fail.takeIf { it.hex == hex }

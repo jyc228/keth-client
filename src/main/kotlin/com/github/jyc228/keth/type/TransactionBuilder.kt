@@ -1,5 +1,11 @@
 package com.github.jyc228.keth.type
 
+import com.github.jyc228.keth.client.eth.Access
+import com.github.jyc228.keth.client.eth.ECDSASignature
+import com.github.jyc228.keth.client.eth.RpcTransaction
+import com.github.jyc228.keth.client.eth.Transaction
+import com.github.jyc228.keth.client.eth.TransactionType
+
 fun buildLegacyTransaction(init: LegacyTransactionBuilder.() -> Unit): Transaction {
     return RpcTransaction(type = TransactionType.Legacy).apply(init)
 }

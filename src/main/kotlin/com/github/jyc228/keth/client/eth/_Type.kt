@@ -1,6 +1,10 @@
-package com.github.jyc228.keth.type
+package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.Hash
+import com.github.jyc228.keth.type.HexString
+import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.serializer
 
 @JvmInline
 @Serializable
@@ -29,3 +33,20 @@ value class BlockReference private constructor(val value: String) {
 val Int.ref get() = BlockReference(this)
 val ULong.ref get() = BlockReference(this)
 val Hash.ref get() = BlockReference.fromHex(this)
+
+class GetBlockOption<T : Transactions> internal constructor(
+    val serializer: KSerializer<RpcBlock<T>?>,
+    val fullTx: Boolean = false
+)
+
+val txHash = GetBlockOption<TransactionHashes>(serializer(), false)
+val txObject = GetBlockOption<TransactionObjects>(serializer(), true)
+
+class FilterId<T> internal constructor(
+    val id: String,
+    val serializer: KSerializer<List<T>>
+) {
+    companion object {
+        fun log(filterId: String): FilterId<Log> = FilterId(filterId, serializer())
+    }
+}

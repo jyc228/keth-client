@@ -2,12 +2,12 @@ package com.github.jyc228.keth.contract
 
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
+import com.github.jyc228.keth.client.eth.GetLogsRequest
+import com.github.jyc228.keth.client.eth.Log
+import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Address
-import com.github.jyc228.keth.type.GetLogsRequest
-import com.github.jyc228.keth.type.Log
-import com.github.jyc228.keth.type.Topics
 import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 
