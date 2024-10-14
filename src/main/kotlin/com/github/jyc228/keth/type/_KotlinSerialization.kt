@@ -98,9 +98,6 @@ internal class NullTxIndex : NullSerializer<HexInt>(HexInt.serializer(), HexInt(
 internal class NullGas : NullSerializer<HexBigInt>(HexBigInt.serializer(), HexBigInt("0"))
 internal class NullList<E>(element: KSerializer<E>) : NullSerializer<List<E>>(ListSerializer(element), emptyList())
 
-fun createEthSerializersModule(unknownTransactionSerializer: UnknownTransactionSerializer?) = SerializersModule {
-    polymorphic(Transaction::class) {
-        if (unknownTransactionSerializer == null) defaultDeserializer { RpcTransaction.serializer() }
-        else defaultDeserializer { unknownTransactionSerializer }
-    }
+fun createEthSerializersModule(serializer: KSerializer<Transaction>) = SerializersModule {
+    polymorphic(Transaction::class) { defaultDeserializer { serializer } }
 }

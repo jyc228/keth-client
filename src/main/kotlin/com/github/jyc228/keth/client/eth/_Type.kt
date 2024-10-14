@@ -34,13 +34,11 @@ val Int.ref get() = BlockReference(this)
 val ULong.ref get() = BlockReference(this)
 val Hash.ref get() = BlockReference.fromHex(this)
 
-class GetBlockOption<T : Transactions> internal constructor(
-    val serializer: KSerializer<RpcBlock<T>?>,
-    val fullTx: Boolean = false
-)
+@JvmInline
+value class GetBlockOption<T : Transactions> internal constructor(val fullTx: Boolean = false)
 
-val txHash = GetBlockOption<TransactionHashes>(serializer(), false)
-val txObject = GetBlockOption<TransactionObjects>(serializer(), true)
+val txHash = GetBlockOption<TransactionHashes>(false)
+val txObject = GetBlockOption<TransactionObjects>(true)
 
 class FilterId<T> internal constructor(
     val id: String,

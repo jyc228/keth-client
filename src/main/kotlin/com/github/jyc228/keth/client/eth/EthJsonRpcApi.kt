@@ -14,23 +14,26 @@ import org.web3j.crypto.Credentials
 import org.web3j.crypto.TransactionEncoder
 import org.web3j.utils.Numeric
 
-class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(client) {
+class EthJsonRpcApi(
+    client: JsonRpcClientWrapper,
+    private val config: SerializerConfig
+) : EthApi, AbstractJsonRpcApi(client) {
 
     override suspend fun chainId(): ApiResult<HexULong> = "eth_chainId"()
     override suspend fun gasPrice(): ApiResult<HexBigInt> = "eth_gasPrice"()
     override suspend fun blockNumber(): ApiResult<HexULong> = "eth_blockNumber"()
 
     override suspend fun getHeader(ref: BlockReference): ApiResult<BlockHeader> = when (ref.hash) {
-        true -> "eth_getHeaderByHash"(ref.value, RpcBlockHeader.serializer())
-        false -> "eth_getHeaderByNumber"(ref.value, RpcBlockHeader.serializer())
+        true -> "eth_getHeaderByHash"(ref.value, config.blockHeader)
+        false -> "eth_getHeaderByNumber"(ref.value, config.blockHeader)
     }
 
     override suspend fun <T : Transactions> getBlock(
         option: GetBlockOption<T>,
         ref: BlockReference
     ): ApiResult<Block<T>?> = when (ref.hash) {
-        true -> "eth_getBlockByHash"(ref.value, option.fullTx, option.serializer)
-        false -> "eth_getBlockByNumber"(ref.value, option.fullTx, option.serializer)
+        true -> "eth_getBlockByHash"(ref.value, option.fullTx, config.getBlockSerializer(option))
+        false -> "eth_getBlockByNumber"(ref.value, option.fullTx, config.getBlockSerializer(option))
     }
 
     override suspend fun getBlockTransactionCount(ref: BlockReference): ApiResult<HexULong> = when (ref.hash) {
@@ -60,8 +63,8 @@ class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(c
         ref: BlockReference,
         index: Int
     ): ApiResult<Transaction?> = when (ref.hash) {
-        true -> "eth_getTransactionByBlockHashAndIndex"(ref.value, index.hex, RpcTransaction.serializer())
-        false -> "eth_getTransactionByBlockNumberAndIndex"(ref.value, index.hex, RpcTransaction.serializer())
+        true -> "eth_getTransactionByBlockHashAndIndex"(ref.value, index.hex, config.transaction)
+        false -> "eth_getTransactionByBlockNumberAndIndex"(ref.value, index.hex, config.transaction)
     }
 
     override suspend fun getTransactionReceipt(hash: Hash): ApiResult<TransactionReceipt?> =
@@ -121,7 +124,7 @@ class EthJsonRpcApi(client: JsonRpcClientWrapper) : EthApi, AbstractJsonRpcApi(c
         account: com.github.jyc228.keth.AccountWithPrivateKey,
         build: suspend TransactionBuilder.() -> Unit
     ): ApiResult<Hash> {
-        val client = EthJsonRpcApi(client.toImmediateClient())
+        val client = EthJsonRpcApi(client.toImmediateClient(), config)
         val tx = TransactionBuilder().apply { build() }
         if (tx.gasPrice.number == BigInteger.ZERO) {
             tx.gasPrice = client.gasPrice().awaitOrThrow()

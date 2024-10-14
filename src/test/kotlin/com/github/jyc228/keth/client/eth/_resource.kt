@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.type.UnknownTransactionSerializer
 import com.github.jyc228.keth.type.createEthSerializersModule
 import io.kotest.matchers.resource.resourceAsString
 import kotlinx.serialization.encodeToString
@@ -9,7 +10,9 @@ import kotlinx.serialization.modules.plus
 val defaultJson = Json {
     ignoreUnknownKeys = true
     classDiscriminator = ""
-    serializersModule += createEthSerializersModule(null)
+    serializersModule += createEthSerializersModule(UnknownTransactionSerializer {
+        RpcTransaction.serializer()
+    })
 }
 
 inline fun <reified T> decodeJsonResource(path: String, json: Json = defaultJson): T {
