@@ -41,8 +41,8 @@ suspend fun <R1, R2, R3, RESULT> EthereumClient.batch3(
     transform: suspend (ApiResult<R1>, ApiResult<R2>, ApiResult<R3>) -> RESULT
 ): RESULT = batch(e1, e2, e3).let { transform(it[0] as ApiResult<R1>, it[1] as ApiResult<R2>, it[2] as ApiResult<R3>) }
 
-private suspend fun EthereumClient.batch(vararg e: BatchElement<Any?>): List<ApiResult<out Any?>> {
+private suspend fun EthereumClient.batch(vararg e: BatchElement<Any?>): List<ApiResult<Any?>> {
     return batch { e.map { it(this) } }
 }
 
-private typealias BatchElement<T> = suspend EthereumClient.() -> ApiResult<out T>
+private typealias BatchElement<T> = suspend EthereumClient.() -> ApiResult<T>

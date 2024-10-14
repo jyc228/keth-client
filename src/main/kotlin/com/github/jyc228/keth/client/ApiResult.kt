@@ -8,7 +8,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonNull
 
-suspend fun <T> List<ApiResult<out T>>.awaitAllOrThrow(): List<T> = map { it.awaitOrThrow() }
+suspend fun <T> List<ApiResult<T>>.awaitAllOrThrow(): List<T> = map { it.awaitOrThrow() }
 
 fun <T> ApiResult(
     response: JsonRpcResponse,
