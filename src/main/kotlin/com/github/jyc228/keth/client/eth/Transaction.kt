@@ -91,7 +91,7 @@ sealed class TransactionType(val value: Int, override val hex: String) : HexStri
     data object AccessList : TransactionType(1, "0x1")
     data object DynamicFee : TransactionType(2, "0x2")
     data object Blob : TransactionType(3, "0x3")
-    class Unknown(hex: String) : TransactionType(hex.hexToInt(), hex)
+    class Unknown(hex: String) : TransactionType(hex.hexToInt(), hex.removePrefix("0x"))
 
     companion object {
         fun from(hex: String): TransactionType = Legacy.takeIf { it.hex == hex }
