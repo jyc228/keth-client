@@ -10,22 +10,20 @@ import com.github.jyc228.keth.client.eth.SerializerConfig
 import com.github.jyc228.keth.client.eth.Transaction
 import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.type.Address
-import com.github.jyc228.keth.type.createEthSerializersModule
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
-import kotlinx.serialization.modules.plus
 
 data class EthereumClientConfig(
     var interval: Duration = 0.milliseconds,
     var adminJwtSecret: String? = null,
     var json: (JsonBuilder.() -> Unit)? = null,
-    var blockHeaderSerializer: KSerializer<BlockHeader>? = null,
-    var transactionSerializer: KSerializer<Transaction>? = null,
-    var blockWithTxHashesSerializer: KSerializer<Block<Block.TransactionHash>>? = null,
-    var blockWithTxObjectsSerializer: KSerializer<Block<Block.TransactionObject>>? = null
+    var blockHeaderSerializer: KSerializer<out BlockHeader>? = null,
+    var transactionSerializer: KSerializer<out Transaction>? = null,
+    var blockWithTxHashesSerializer: KSerializer<out Block<Block.TransactionHash>>? = null,
+    var blockWithTxObjectsSerializer: KSerializer<out Block<Block.TransactionObject>>? = null
 )
 
 fun EthereumClient.Companion.fromRpcUrl(
@@ -37,7 +35,6 @@ fun EthereumClient.Companion.fromRpcUrl(
     val json = Json {
         ignoreUnknownKeys = true
         classDiscriminator = ""
-        serializersModule += createEthSerializersModule(serializerConfig.transaction)
         config.json?.invoke(this)
     }
     val client = JsonRpcClient.from(url, config.adminJwtSecret)
@@ -49,10 +46,8 @@ fun EthereumClient.Companion.fromRpcUrl(
 }
 
 private fun EthereumClientConfig.toSerializerConfig() = SerializerConfig(
-    blockHeader = blockHeaderSerializer ?: RpcBlockHeader.serializer() as KSerializer<BlockHeader>,
-    transaction = transactionSerializer ?: RpcTransaction.serializer() as KSerializer<Transaction>,
-    blockWithTxHashes = blockWithTxHashesSerializer
-        ?: RpcBlock.serializer(Block.TransactionHash.serializer()) as KSerializer<Block<Block.TransactionHash>>,
-    blockWithTxObjects = blockWithTxObjectsSerializer
-        ?: RpcBlock.serializer(Block.TransactionObject.serializer()) as KSerializer<Block<Block.TransactionObject>>
+    blockHeader = blockHeaderSerializer ?: RpcBlockHeader.serializer(),
+    transaction = transactionSerializer ?: RpcTransaction.serializer(),
+    blockWithTxHashes = blockWithTxHashesSerializer ?: RpcBlock.serializer(Block.TransactionHash.serializer()),
+    blockWithTxObjects = blockWithTxObjectsSerializer ?: RpcBlock.serializer(Block.TransactionObject.serializer())
 )
