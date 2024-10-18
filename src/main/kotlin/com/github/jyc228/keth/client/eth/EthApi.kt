@@ -23,11 +23,11 @@ interface EthApi {
     suspend fun getHeaderByNumber(number: ULong) = getHeader(number.ref)
     suspend fun getHeaderByNumber(tag: String) = getHeader(BlockReference.fromTag(tag))
 
-    suspend fun <T : Transactions> getBlock(option: GetBlockOption<T>, ref: BlockReference = latest): ApiResult<Block<T>?>
-    suspend fun <T : Transactions> getBlocks(numbers: ULongRange, option: GetBlockOption<T>): List<ApiResult<Block<T>?>> = numbers.map { getBlock(option, it.ref) }
-    suspend fun <T : Transactions> getBlockByHash(hash: Hash, option: GetBlockOption<T>) = getBlock(option, hash.ref)
-    suspend fun <T : Transactions> getBlockByNumber(number: ULong, option: GetBlockOption<T>) = getBlock(option, number.ref)
-    suspend fun <T : Transactions> getBlockByNumber(tag: String, option: GetBlockOption<T>) = getBlock(option, BlockReference.fromTag(tag))
+    suspend fun <E : Block.TransactionElement> getBlock(option: GetBlockOption<E>, ref: BlockReference = latest): ApiResult<Block<E>?>
+    suspend fun <E : Block.TransactionElement> getBlocks(numbers: ULongRange, option: GetBlockOption<E>): List<ApiResult<Block<E>?>> = numbers.map { getBlock(option, it.ref) }
+    suspend fun <E : Block.TransactionElement> getBlockByHash(hash: Hash, option: GetBlockOption<E>) = getBlock(option, hash.ref)
+    suspend fun <E : Block.TransactionElement> getBlockByNumber(number: ULong, option: GetBlockOption<E>) = getBlock(option, number.ref)
+    suspend fun <E : Block.TransactionElement> getBlockByNumber(tag: String, option: GetBlockOption<E>) = getBlock(option, BlockReference.fromTag(tag))
 
     suspend fun getBlockTransactionCount(ref: BlockReference = latest): ApiResult<HexULong>
     suspend fun getBlockTransactionCounts(numbers: ULongRange) = numbers.map { getBlockTransactionCount(it.ref) }

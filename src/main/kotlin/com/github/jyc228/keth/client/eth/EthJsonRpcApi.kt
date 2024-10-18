@@ -28,10 +28,10 @@ class EthJsonRpcApi(
         false -> "eth_getHeaderByNumber"(ref.value, config.blockHeader)
     }
 
-    override suspend fun <T : Transactions> getBlock(
-        option: GetBlockOption<T>,
+    override suspend fun <E : Block.TransactionElement> getBlock(
+        option: GetBlockOption<E>,
         ref: BlockReference
-    ): ApiResult<Block<T>?> = when (ref.hash) {
+    ): ApiResult<Block<E>?> = when (ref.hash) {
         true -> "eth_getBlockByHash"(ref.value, option.fullTx, config.getBlockSerializer(option))
         false -> "eth_getBlockByNumber"(ref.value, option.fullTx, config.getBlockSerializer(option))
     }

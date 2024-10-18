@@ -5,11 +5,11 @@ import kotlinx.serialization.KSerializer
 class SerializerConfig(
     val blockHeader: KSerializer<BlockHeader>,
     val transaction: KSerializer<Transaction>,
-    val blockWithTxHashes: KSerializer<Block<TransactionHashes>>,
-    val blockWithTxObjects: KSerializer<Block<TransactionObjects>>
+    val blockWithTxHashes: KSerializer<Block<Block.TransactionHash>>,
+    val blockWithTxObjects: KSerializer<Block<Block.TransactionObject>>
 ) {
-    fun <T : Transactions> getBlockSerializer(option: GetBlockOption<T>) = when (option.fullTx) {
+    fun <E : Block.TransactionElement> getBlockSerializer(option: GetBlockOption<E>) = when (option.fullTx) {
         true -> blockWithTxObjects
         false -> blockWithTxHashes
-    } as KSerializer<Block<T>>
+    } as KSerializer<Block<E>>
 }

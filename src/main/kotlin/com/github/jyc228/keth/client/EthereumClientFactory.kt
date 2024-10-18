@@ -8,8 +8,6 @@ import com.github.jyc228.keth.client.eth.RpcBlockHeader
 import com.github.jyc228.keth.client.eth.RpcTransaction
 import com.github.jyc228.keth.client.eth.SerializerConfig
 import com.github.jyc228.keth.client.eth.Transaction
-import com.github.jyc228.keth.client.eth.TransactionHashes
-import com.github.jyc228.keth.client.eth.TransactionObjects
 import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.createEthSerializersModule
@@ -26,8 +24,8 @@ data class EthereumClientConfig(
     var json: (JsonBuilder.() -> Unit)? = null,
     var blockHeaderSerializer: KSerializer<BlockHeader>? = null,
     var transactionSerializer: KSerializer<Transaction>? = null,
-    var blockWithTxHashesSerializer: KSerializer<Block<TransactionHashes>>? = null,
-    var blockWithTxObjectsSerializer: KSerializer<Block<TransactionObjects>>? = null
+    var blockWithTxHashesSerializer: KSerializer<Block<Block.TransactionHash>>? = null,
+    var blockWithTxObjectsSerializer: KSerializer<Block<Block.TransactionObject>>? = null
 )
 
 fun EthereumClient.Companion.fromRpcUrl(
@@ -54,7 +52,7 @@ private fun EthereumClientConfig.toSerializerConfig() = SerializerConfig(
     blockHeader = blockHeaderSerializer ?: RpcBlockHeader.serializer() as KSerializer<BlockHeader>,
     transaction = transactionSerializer ?: RpcTransaction.serializer() as KSerializer<Transaction>,
     blockWithTxHashes = blockWithTxHashesSerializer
-        ?: RpcBlock.serializer(TransactionHashes.serializer()) as KSerializer<Block<TransactionHashes>>,
+        ?: RpcBlock.serializer(Block.TransactionHash.serializer()) as KSerializer<Block<Block.TransactionHash>>,
     blockWithTxObjects = blockWithTxObjectsSerializer
-        ?: RpcBlock.serializer(TransactionObjects.serializer()) as KSerializer<Block<TransactionObjects>>
+        ?: RpcBlock.serializer(Block.TransactionObject.serializer()) as KSerializer<Block<Block.TransactionObject>>
 )
