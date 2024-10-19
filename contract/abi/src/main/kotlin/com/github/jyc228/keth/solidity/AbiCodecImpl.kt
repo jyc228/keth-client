@@ -1,12 +1,13 @@
 package com.github.jyc228.keth.solidity
 
 class AbiCodecImpl : AbiCodec {
+    private val primitiveValueConverter = mutableMapOf<String, (Any) -> Any>()
     override fun decode(component: AbiComponent, hex: String): Any {
-        return Codec.decode(Type.of(component.encodeType()), Codec.DecodingContext(hex))
+        return Codec.decode(Type.of(component.encodeType()), Codec.DecodingContext(hex, primitiveValueConverter))
     }
 
     override fun decode(components: List<AbiComponent>, hex: String): Map<String, Any> {
-        val result = TupleCodec.decode(components.toTupleType(), Codec.DecodingContext(hex))
+        val result = TupleCodec.decode(components.toTupleType(), Codec.DecodingContext(hex, primitiveValueConverter))
         return convertToMap(components, result)
     }
 
@@ -30,7 +31,7 @@ class AbiCodecImpl : AbiCodec {
     }
 
     override fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
-        Codec.registerPrimitiveTypeConverter(typeName, converter)
+        primitiveValueConverter[typeName] = converter
     }
 
     private fun List<AbiComponent>.toTupleType() = TupleType(map { Type.of(it.encodeType()) })

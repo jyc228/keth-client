@@ -8,8 +8,6 @@ import com.github.jyc228.keth.client.eth.RpcBlockHeader
 import com.github.jyc228.keth.client.eth.RpcTransaction
 import com.github.jyc228.keth.client.eth.SerializerConfig
 import com.github.jyc228.keth.client.eth.Transaction
-import com.github.jyc228.keth.solidity.AbiCodec
-import com.github.jyc228.keth.type.Address
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.serialization.KSerializer
@@ -38,7 +36,6 @@ fun EthereumClient.Companion.fromRpcUrl(
         config.json?.invoke(this)
     }
     val client = JsonRpcClient.from(url, config.adminJwtSecret)
-    AbiCodec.registerPrimitiveTypeConverter("address") { Address.fromHexString(it.toString()) }
     if (config.interval.isPositive()) {
         return ScheduledBatchEthereumClient(client, config.interval, json, serializerConfig)
     }

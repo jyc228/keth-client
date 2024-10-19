@@ -3,7 +3,6 @@ package com.github.jyc228.keth.contract
 import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.contract.Contract.GetEventRequest
-import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import kotlin.reflect.KClass
@@ -22,7 +21,7 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     fun decodeIf(log: Log): EVENT? = if (log.topics.getOrNull(0)?.hex == hash.hex) decode(log) else null
 
     fun decode(log: Log): EVENT {
-        val resultByName = AbiCodec.decodeLog(abi.inputs, log)
+        val resultByName = abiCodec.decodeLog(abi.inputs, log)
         val params = const.parameters.associateWith { p -> resultByName[p.name] }
         return const.callBy(params)
     }

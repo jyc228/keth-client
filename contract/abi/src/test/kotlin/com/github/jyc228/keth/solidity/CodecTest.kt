@@ -178,8 +178,6 @@ private class EncodeTestBuilder {
     infix fun TC.shouldBe(expected: String) = apply { testCases += this.also { it.expected = expected } }
 }
 
-
-@OptIn(ExperimentalStdlibApi::class)
 private suspend fun <R> ContainerScope.decodeTest(
     convertResult: (Any?) -> R,
     buildTest: DecodeTestBuilder<R>.() -> Unit
@@ -188,9 +186,9 @@ private suspend fun <R> ContainerScope.decodeTest(
         nameFn = { tc -> "${tc.type}(${tc.inputHex})" },
         DecodeTestBuilder<R>().apply(buildTest).testCases
     ) { tc ->
-        val context = Codec.DecodingContext(tc.inputHex)
+        val context = Codec.DecodingContext(tc.inputHex, emptyMap())
         convertResult(Codec.decode(tc.type, context)) shouldBe tc.expected
-        context.read(context.buffer.remaining()).toHexString() shouldBe tc.remaining
+        context.readHexString(context.buffer.remaining()) shouldBe tc.remaining
     }
 }
 

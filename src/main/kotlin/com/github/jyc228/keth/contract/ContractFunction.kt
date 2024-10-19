@@ -1,6 +1,5 @@
 package com.github.jyc228.keth.contract
 
-import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexString
@@ -26,18 +25,18 @@ abstract class AbstractContractFunction<R>(
 
     protected fun encodeFunctionCall(vararg parameters: Any?): String {
         if (parameters.isEmpty()) return sig
-        return "${sig.take(10)}${AbiCodec.encode(abi.inputs, parameters.map { (it as? HexString)?.hex ?: it })}"
+        return "${sig.take(10)}${abiCodec.encode(abi.inputs, parameters.map { (it as? HexString)?.hex ?: it })}"
     }
 
     protected fun decodeFunctionParameter(input: String): List<Any> {
-        val result = AbiCodec.decode(abi.inputs, input.drop(10))
+        val result = abiCodec.decode(abi.inputs, input.drop(10))
         return abi.inputs.map { result.getValue(it.name) }
     }
 
     @Suppress("UNCHECKED_CAST")
     fun decodeResult(result: HexData?): R {
         if (result == null) return null as R
-        val result = AbiCodec.decode(abi.outputs, result.hex.removePrefix("0x"))
+        val result = abiCodec.decode(abi.outputs, result.hex.removePrefix("0x"))
         return result.getValue(abi.outputs[0].name) as R
     }
 }
