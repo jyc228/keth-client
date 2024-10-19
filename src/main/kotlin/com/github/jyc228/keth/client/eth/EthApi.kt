@@ -81,7 +81,7 @@ interface EthApi {
         init: GetLogsRequest.() -> Unit
     ): List<Pair<T, Log>> = getLogs(GetLogsRequest(topics = Topics().filterByEvent(event)).apply(init))
         .awaitOrThrow()
-        .mapNotNull { log -> event.decodeIf(log.data, log.topics)?.let { e -> e to log } }
+        .mapNotNull { log -> event.decodeIf(log)?.let { e -> e to log } }
 
     suspend fun call(
         ref: BlockReference = latest,

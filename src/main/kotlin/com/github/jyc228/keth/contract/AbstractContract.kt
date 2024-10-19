@@ -25,7 +25,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
         val request = GetLogsRequest(address = mutableSetOf(address)).apply { options?.invoke(this) }
         return api.getLogs(request).map { logs ->
             logs.mapNotNull { log ->
-                eventFactoryByHash[log.topics[0].hex]?.decodeIf(log.data, log.topics)?.let { e -> e to log }
+                eventFactoryByHash[log.topics[0].hex]?.decodeIf(log)?.let { e -> e to log }
             }
         }
     }
@@ -42,7 +42,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
             val eventRequestByHash = requests.associateBy { it.factory.hash.hex }
             logs.map { log ->
                 val eventRequest = requireNotNull(eventRequestByHash[log.topics.first().hex])
-                val decoded = eventRequest.factory.decode(log.data, log.topics)
+                val decoded = eventRequest.factory.decode(log)
                 eventRequest.subscribe?.invoke(decoded)
                 decoded to log
             }
