@@ -8,6 +8,7 @@ import com.github.jyc228.keth.client.eth.EthApi
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexBigInt
+import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexULong
 
 interface ContractFunctionRequest<R> {
@@ -39,9 +40,9 @@ interface ContractFunctionRequest<R> {
 
 class EthContractFunctionRequest<R>(
     private val contractAddress: Address,
-    private val function: AbstractContractFunction<R>,
     private val eth: EthApi,
-    private val data: String
+    private val data: String,
+    private val convertCallResult: (HexData?) -> R
 ) : ContractFunctionRequest<R>,
     ContractFunctionRequest.CallBuilder,
     ContractFunctionRequest.TransactionBuilder {
@@ -58,7 +59,7 @@ class EthContractFunctionRequest<R>(
 
     override suspend fun call(build: suspend ContractFunctionRequest.CallBuilder.() -> Unit): ApiResult<R> {
         val builder: ContractFunctionRequest.CallBuilder = this.apply { build() }
-        val result = eth.call(
+        return eth.call(
             CallRequest(
                 from = builder.from,
                 to = contractAddress,
@@ -68,8 +69,7 @@ class EthContractFunctionRequest<R>(
                 data = data,
             ),
             targetBlock
-        )
-        return result.map { function.decodeResult(it) }
+        ).map(convertCallResult)
     }
 
     override suspend fun transaction(
