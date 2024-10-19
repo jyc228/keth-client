@@ -33,7 +33,7 @@ data class GetLogsRequest(
 @Serializable
 @JvmInline
 value class Topics(val list: MutableList<MutableList<HexData>?> = MutableList(1) { null }) {
-    fun filterByEvent(e: ContractEventFactory<*>) = apply { insert(0, e.hash.hex) }
+    fun filterByEvent(e: ContractEventFactory<*>) = apply { insert(0, e.eventSig.hex) }
     fun filterByAddress(index: Int, vararg address: Address) = apply { address.forEach { insert(index, it.hex) } }
 
     @OptIn(ExperimentalStdlibApi::class)

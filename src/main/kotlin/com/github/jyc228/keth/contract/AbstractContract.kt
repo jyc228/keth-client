@@ -20,7 +20,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
         val eventFactoryByHash = contractInterface
             .nestedClasses
             .mapNotNull { it.companionObjectInstance as? ContractEventFactory<ROOT_EVENT> }
-            .associateBy { it.hash.hex }
+            .associateBy { it.eventSig.hex }
 
         val request = GetLogsRequest(address = mutableSetOf(address)).apply { options?.invoke(this) }
         return api.getLogs(request).map { logs ->
@@ -39,7 +39,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
             options?.invoke(this)
         }
         return api.getLogs(request).map { logs ->
-            val eventRequestByHash = requests.associateBy { it.factory.hash.hex }
+            val eventRequestByHash = requests.associateBy { it.factory.eventSig.hex }
             logs.map { log ->
                 val eventRequest = requireNotNull(eventRequestByHash[log.topics.first().hex])
                 val decoded = eventRequest.factory.decode(log)

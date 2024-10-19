@@ -14,11 +14,11 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     hash: String,
     jsonAbi: () -> String,
 ) {
-    val hash = Hash.fromHexString(hash)
+    val eventSig = Hash.fromHexString(hash)
     private val const = requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
     private val abi: AbiItem by lazy(LazyThreadSafetyMode.NONE) { Json.decodeFromString(jsonAbi()) }
 
-    fun decodeIf(log: Log): EVENT? = if (log.topics.getOrNull(0)?.hex == hash.hex) decode(log) else null
+    fun decodeIf(log: Log): EVENT? = if (log.topics.getOrNull(0)?.hex == eventSig.hex) decode(log) else null
 
     fun decode(log: Log): EVENT {
         val resultByName = abiCodec.decodeLog(abi.inputs, log)
