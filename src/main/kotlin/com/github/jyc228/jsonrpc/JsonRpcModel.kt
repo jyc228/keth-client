@@ -23,13 +23,13 @@ data class JsonRpcResponse(
 )
 
 @Serializable
-class JsonRpcError(
+data class JsonRpcError(
     val code: Int,
     val message: String,
     val data: JsonElement = JsonNull
 )
 
-class JsonRpcException(
+data class JsonRpcException(
     val id: String,
     val error: JsonRpcError
 ) : RuntimeException("[$id] ${error.message} (${error.code})")
