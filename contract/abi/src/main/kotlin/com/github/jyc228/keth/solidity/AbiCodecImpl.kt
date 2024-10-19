@@ -1,14 +1,12 @@
 package com.github.jyc228.keth.solidity
 
-import java.nio.ByteBuffer
-
-object AbiCodecImpl : AbiCodec {
+class AbiCodecImpl : AbiCodec {
     override fun decode(component: AbiComponent, hex: String): Any {
-        return Codec.decode(Type.of(component.encodeType()), hexToByteBuffer(hex))
+        return Codec.decode(Type.of(component.encodeType()), Codec.DecodingContext(hex))
     }
 
     override fun decode(components: List<AbiComponent>, hex: String): Map<String, Any> {
-        val result = TupleCodec.decode(components.toTupleType(), hexToByteBuffer(hex))
+        val result = TupleCodec.decode(components.toTupleType(), Codec.DecodingContext(hex))
         return convertToMap(components, result)
     }
 
@@ -30,9 +28,6 @@ object AbiCodecImpl : AbiCodec {
             }
         })
     }
-
-    @OptIn(ExperimentalStdlibApi::class)
-    private fun hexToByteBuffer(hex: String) = ByteBuffer.wrap(hex.removePrefix("0x").hexToByteArray())
 
     override fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
         Codec.registerPrimitiveTypeConverter(typeName, converter)

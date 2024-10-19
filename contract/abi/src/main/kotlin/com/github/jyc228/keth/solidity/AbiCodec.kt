@@ -16,5 +16,5 @@ interface AbiCodec {
 
     fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any)
 
-    companion object : AbiCodec by AbiCodecImpl
+    companion object : AbiCodec by AbiCodecImpl()
 }
