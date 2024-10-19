@@ -12,6 +12,21 @@ import kotlinx.serialization.json.Json
 @OptIn(ExperimentalStdlibApi::class)
 internal class AbiCodecTest : DescribeSpec({
 
+    context("encode") {
+        it("Transfer") {
+            val abi =
+                // https://etherscan.io/tx/0xdd377131912e9ac4ca74a60135dc3c9ac7a416d2b956315c34e34432a9bfae9f#eventlog
+                Json.decodeFromString<AbiItem>("""{"inputs":[{"name":"recipient","type":"address","internalType":"address"},{"name":"amount","type":"uint256","internalType":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"nonpayable","type":"function"}""")
+
+            val result = AbiCodec.encode(
+                abi.inputs,
+                listOf("0x2b8A6034c83706aacC846ddc4a2c8E943C09aE44", 60220000.toBigInteger())
+            )
+
+            result shouldBe "0000000000000000000000002b8a6034c83706aacc846ddc4a2c8e943c09ae44000000000000000000000000000000000000000000000000000000000396e260"
+        }
+    }
+
     context("decodeLog") {
         it("TransactionBatchAppended") {
             val abi =
