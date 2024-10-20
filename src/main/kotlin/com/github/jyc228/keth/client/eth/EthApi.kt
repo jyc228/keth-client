@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.PrivateAccount
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.BlockReference.Companion.latest
 import com.github.jyc228.keth.contract.ContractEvent
@@ -70,7 +71,7 @@ interface EthApi {
     suspend fun estimateGas(request: CallRequest): ApiResult<HexBigInt>
     suspend fun sendRawTransaction(signedTransactionData: String): ApiResult<Hash>
     suspend fun sendTransaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend TransactionBuilder.() -> Unit
     ): ApiResult<Hash>
 

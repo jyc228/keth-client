@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.contract
 
+import com.github.jyc228.keth.PrivateAccount
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.Access
 import com.github.jyc228.keth.client.eth.BlockReference
@@ -14,7 +15,7 @@ import com.github.jyc228.keth.type.HexULong
 interface ContractFunctionRequest<R> {
     suspend fun call(build: suspend CallBuilder.() -> Unit): ApiResult<R>
     suspend fun transaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend TransactionBuilder.() -> Unit
     ): ApiResult<Hash>
 
@@ -73,7 +74,7 @@ class EthContractFunctionRequest<R>(
     }
 
     override suspend fun transaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend ContractFunctionRequest.TransactionBuilder.() -> Unit
     ): ApiResult<Hash> {
         val builder: ContractFunctionRequest.TransactionBuilder = this.apply { build() }

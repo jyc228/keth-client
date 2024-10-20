@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.PrivateAccount
 import com.github.jyc228.keth.client.AbstractJsonRpcApi
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.JsonRpcClientWrapper
@@ -121,7 +122,7 @@ class EthJsonRpcApi(
         "eth_sendRawTransaction"(signedTransactionData)
 
     override suspend fun sendTransaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend TransactionBuilder.() -> Unit
     ): ApiResult<Hash> {
         val client = EthJsonRpcApi(client.toImmediateClient(), config)
