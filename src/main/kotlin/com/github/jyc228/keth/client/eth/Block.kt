@@ -6,8 +6,8 @@ import com.github.jyc228.keth.type.HexBigInt
 import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexInt
 import com.github.jyc228.keth.type.HexULong
-import com.github.jyc228.keth.type.TransactionHashesSerializer
-import com.github.jyc228.keth.type.TransactionObjectsSerializer
+import com.github.jyc228.keth.type.TransactionHashSerializer
+import com.github.jyc228.keth.type.TransactionObjectSerializer
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 
@@ -40,25 +40,22 @@ interface BlockHeader {
     val excessBlobGas: HexBigInt?
 }
 
-interface Block<T : Transactions> : BlockHeader {
+interface Block<T : Block.TransactionElement> : BlockHeader {
     val size: HexData
-    val transactions: T
+    val transactions: List<T>
     val uncles: List<Hash>
     val withdrawals: List<Withdrawal>
-}
 
-sealed interface Transactions {
-    val hashes: List<Hash>
-}
+    sealed interface TransactionElement
 
-@Serializable(TransactionHashesSerializer::class)
-class TransactionHashes(override val hashes: List<Hash>) : Transactions, List<Hash> by hashes
+    @Serializable(TransactionHashSerializer::class)
+    class TransactionHash(val hash: Hash) : TransactionElement {
+        override fun toString(): String = hash.toString()
+    }
 
-@Serializable(TransactionObjectsSerializer::class)
-class TransactionObjects(self: List<Transaction>) : Transactions, List<Transaction> by self {
-    override val hashes: List<Hash> = object : AbstractList<Hash>() {
-        override val size: Int get() = this@TransactionObjects.size
-        override fun get(index: Int): Hash = this@TransactionObjects[index].hash
+    @Serializable(TransactionObjectSerializer::class)
+    class TransactionObject(private val self: Transaction) : TransactionElement, Transaction by self {
+        override fun toString(): String = self.toString()
     }
 }
 

@@ -7,50 +7,61 @@ import kotlin.math.ceil
 sealed interface Codec {
     fun computeEncodeSize(type: Type, data: Any?): Int
     fun encode(type: Type, data: Any?, buffer: ByteBuffer)
-    fun decode(type: Type, buffer: ByteBuffer): Any
+    fun decode(type: Type, context: DecodingContext): Any
+
+    @OptIn(ExperimentalStdlibApi::class)
+    class DecodingContext(
+        internal val buffer: ByteBuffer,
+        val primitiveValueConverter: Map<String, (Any) -> Any>
+    ) {
+        constructor(
+            hex: String,
+            primitiveValueConverter: Map<String, (Any) -> Any>
+        ) : this(ByteBuffer.wrap(hex.removePrefix("0x").hexToByteArray()), primitiveValueConverter)
+
+        fun read(size: Int) = ByteArray(size).also { buffer.get(it) }
+        fun readHexString(size: Int) = ByteArray(size).also { buffer.get(it) }.toHexString()
+        fun read() = buffer.get()
+        fun skip(count: Int) = apply { buffer.position(buffer.position() + count) }
+        fun position(newPosition: Int) = apply { buffer.position(newPosition) }
+        fun position() = buffer.position()
+    }
 
     companion object : Codec {
-        private val primitiveTypeCodec = mutableMapOf<String, Codec>().apply {
-            this["string"] = StringCodec
-            this["bool"] = BooleanCodec
-            this["address"] = AddressCodec
-            this["bytes"] = BytesCodec
-            this["int"] = NumberCodec
-            this["uint"] = NumberCodec
-        }
-
-        fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
-            val codec = primitiveTypeCodec[typeName] ?: error { "unsupported type $typeName" }
-            if (codec is CustomCodec) return
-            primitiveTypeCodec[typeName] = CustomCodec(codec, converter)
-        }
-
         fun encode(type: Type, data: Any?): ByteArray {
             return ByteBuffer.allocate(computeEncodeSize(type, data)).also { encode(type, data, it) }.array()
         }
 
-        @OptIn(ExperimentalStdlibApi::class)
-        fun decode(type: Type, hex: String): Any {
-            return decode(type, ByteBuffer.wrap(hex.removePrefix("0x").hexToByteArray()))
-        }
-
         override fun computeEncodeSize(type: Type, data: Any?): Int = selectCodec(type).computeEncodeSize(type, data)
         override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = selectCodec(type).encode(type, data, buffer)
-        override fun decode(type: Type, buffer: ByteBuffer): Any = selectCodec(type).decode(type, buffer)
+        override fun decode(type: Type, context: DecodingContext): Any = selectCodec(type).decode(type, context)
 
         private fun selectCodec(type: Type): Codec = when (type) {
             is ArrayType -> ArrayCodec
             is TupleType -> TupleCodec
-            is PrimitiveType -> primitiveTypeCodec[type.name] ?: error { "unsupported type $type" }
+            is PrimitiveType -> when (type.name) {
+                "string" -> StringCodec
+                "bool" -> BooleanCodec
+                "address" -> AddressCodec
+                "bytes" -> BytesCodec
+                "int" -> NumberCodec
+                "uint" -> NumberCodec
+                else -> error { "unsupported type $type" }
+            }
         }
     }
 }
 
-class CustomCodec(private val codec: Codec, private val converter: (Any) -> Any) : Codec by codec {
-    override fun decode(type: Type, buffer: ByteBuffer): Any = converter(codec.decode(type, buffer))
+abstract class PrimitiveCodec<T : Any> : Codec {
+    override fun decode(type: Type, context: Codec.DecodingContext): Any {
+        val result = decodeTyped(type, context)
+        return context.primitiveValueConverter[type.name]?.invoke(result) ?: result
+    }
+
+    abstract fun decodeTyped(type: Type, context: Codec.DecodingContext): T
 }
 
-data object BooleanCodec : Codec {
+data object BooleanCodec : PrimitiveCodec<Boolean>() {
     override fun computeEncodeSize(type: Type, data: Any?): Int = 32
 
     override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = encode(data, buffer)
@@ -82,13 +93,12 @@ data object BooleanCodec : Codec {
         else -> error("unsupported type $value")
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): Boolean {
-        repeat(31) { require(buffer.get() == 0.toByte()) }
-        return buffer.get() == 1.toByte()
+    override fun decodeTyped(type: Type, context: Codec.DecodingContext): Boolean {
+        return context.skip(31).read() == 1.toByte()
     }
 }
 
-data object NumberCodec : Codec {
+data object NumberCodec : PrimitiveCodec<BigInteger>() {
     private data class Limit(val min: BigInteger, val max: BigInteger)
 
     private val limitByType = buildMap {
@@ -123,16 +133,15 @@ data object NumberCodec : Codec {
         buffer.putHexString(hex)
     }
 
-    @OptIn(ExperimentalStdlibApi::class)
-    override fun decode(type: Type, buffer: ByteBuffer): BigInteger {
-        val result = ByteArray(32).also { buffer.get(it) }.toHexString().toBigInteger(16)
+    override fun decodeTyped(type: Type, context: Codec.DecodingContext): BigInteger {
+        val result = context.readHexString(32).toBigInteger(16)
         if (type.dynamic) return result
         if (result <= limitByType[type.toString()]!!.max) return result
         return result - mask
     }
 }
 
-data object StringCodec : Codec {
+data object StringCodec : PrimitiveCodec<String>() {
     @OptIn(ExperimentalStdlibApi::class)
     override fun computeEncodeSize(type: Type, data: Any?): Int =
         BytesCodec.computeEncodeSize(type, data.toString().toByteArray(Charsets.UTF_8).toHexString())
@@ -142,12 +151,12 @@ data object StringCodec : Codec {
         BytesCodec.encode(type, data.toString().toByteArray(Charsets.UTF_8).toHexString(), buffer)
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): String {
-        return BytesCodec.decode(type, buffer).toString(Charsets.UTF_8)
+    override fun decodeTyped(type: Type, context: Codec.DecodingContext): String {
+        return BytesCodec.decodeTyped(type, context).toString(Charsets.UTF_8)
     }
 }
 
-data object BytesCodec : Codec {
+data object BytesCodec : PrimitiveCodec<ByteArray>() {
     private val emptyByteArray = byteArrayOf()
     override fun computeEncodeSize(type: Type, data: Any?): Int {
         if (type.size != null) return 32
@@ -167,19 +176,13 @@ data object BytesCodec : Codec {
         buffer.putHexString(hex)
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): ByteArray {
+    override fun decodeTyped(type: Type, context: Codec.DecodingContext): ByteArray {
         if (type.dynamic) {
-            val size = NumberCodec.decode(Type.of("uint32"), buffer)
+            val size = NumberCodec.decodeTyped(Type.of("uint32"), context)
             if (size == BigInteger.ZERO) return emptyByteArray
-            return ByteArray(size.toInt()).also {
-                buffer.get(it)
-                repeat(32 - (size.toInt() % 32)) { require(buffer.get() == 0.toByte()) }
-            }
+            return context.read(size.toInt()).also { context.skip(32 - (size.toInt() % 32)) }
         }
-        return ByteArray(requireNotNull(type.size)).also {
-            buffer.get(it)
-            repeat(32 - type.size!!) { require(buffer.get() == 0.toByte()) }
-        }
+        return context.read(requireNotNull(type.size)).also { context.skip(32 - it.size) }
     }
 
     private fun toValidHexString(hex: String): String {
@@ -190,7 +193,7 @@ data object BytesCodec : Codec {
     }
 }
 
-data object AddressCodec : Codec {
+data object AddressCodec : PrimitiveCodec<String>() {
     override fun computeEncodeSize(type: Type, data: Any?): Int = 32
 
     override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = encode(data, buffer)
@@ -204,12 +207,8 @@ data object AddressCodec : Codec {
         buffer.position(12).putHexString(address)
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): String = decode(buffer)
-
-    @OptIn(ExperimentalStdlibApi::class)
-    fun decode(data: ByteBuffer): String {
-        repeat(12) { require(data.get() == 0.toByte()) }
-        return "0x${ByteArray(20).also { data.get(it) }.toHexString().lowercase()}"
+    override fun decodeTyped(type: Type, context: Codec.DecodingContext): String {
+        return "0x${context.skip(12).readHexString(20).lowercase()}"
     }
 }
 
@@ -241,19 +240,19 @@ data object ArrayCodec : Codec {
         data.forEach { Codec.encode(type.elementType, it, buffer) }
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): List<*> {
+    override fun decode(type: Type, context: Codec.DecodingContext): List<*> {
         require(type is ArrayType)
-        val size = type.size ?: NumberCodec.decode(Type.of("uint32"), buffer).toInt()
+        val size = type.size ?: NumberCodec.decodeTyped(Type.of("uint32"), context).toInt()
         if (type.elementType.dynamic) {
-            val offset = buffer.position()
+            val offset = context.position()
             return (0..<size).map {
-                buffer.position(offset + it * 32)
-                val offsetSize = NumberCodec.decode(Type.of("uint32"), buffer)
-                buffer.position(offset + offsetSize.toInt())
-                Codec.decode(type.elementType, buffer)
+                context.position(offset + it * 32)
+                val offsetSize = NumberCodec.decodeTyped(Type.of("uint32"), context)
+                context.position(offset + offsetSize.toInt())
+                Codec.decode(type.elementType, context)
             }
         }
-        return (0..<size).map { Codec.decode(type.elementType, buffer) }
+        return (0..<size).map { Codec.decode(type.elementType, context) }
     }
 }
 
@@ -293,20 +292,20 @@ data object TupleCodec : Codec {
         return type.components.asSequence().map { it to dataIterator.next() }
     }
 
-    override fun decode(type: Type, buffer: ByteBuffer): List<Any> {
+    override fun decode(type: Type, context: Codec.DecodingContext): List<Any> {
         require(type is TupleType)
-        val offset = buffer.position()
+        val offset = context.position()
         return type.components.mapIndexed { i, c ->
             if (c.dynamic) {
-                val offsetSize = NumberCodec.decode(Type.of("uint32"), buffer)
-                buffer.position(offset + offsetSize.toInt())
-                val result = Codec.decode(c, buffer)
+                val offsetSize = NumberCodec.decodeTyped(Type.of("uint32"), context)
+                context.position(offset + offsetSize.toInt())
+                val result = Codec.decode(c, context)
                 if (i < type.components.lastIndex) {
-                    buffer.position(offset + (i + 1) * 32)
+                    context.position(offset + (i + 1) * 32)
                 }
                 result
             } else {
-                Codec.decode(c, buffer)
+                Codec.decode(c, context)
             }
         }
     }

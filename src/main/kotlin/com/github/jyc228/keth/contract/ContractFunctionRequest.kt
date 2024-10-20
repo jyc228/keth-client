@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.contract
 
+import com.github.jyc228.keth.PrivateAccount
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.Access
 import com.github.jyc228.keth.client.eth.BlockReference
@@ -8,12 +9,13 @@ import com.github.jyc228.keth.client.eth.EthApi
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexBigInt
+import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexULong
 
 interface ContractFunctionRequest<R> {
     suspend fun call(build: suspend CallBuilder.() -> Unit): ApiResult<R>
     suspend fun transaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend TransactionBuilder.() -> Unit
     ): ApiResult<Hash>
 
@@ -39,9 +41,9 @@ interface ContractFunctionRequest<R> {
 
 class EthContractFunctionRequest<R>(
     private val contractAddress: Address,
-    private val function: AbstractContractFunction<R>,
     private val eth: EthApi,
-    private val data: String
+    private val data: String,
+    private val convertCallResult: (HexData?) -> R
 ) : ContractFunctionRequest<R>,
     ContractFunctionRequest.CallBuilder,
     ContractFunctionRequest.TransactionBuilder {
@@ -58,7 +60,7 @@ class EthContractFunctionRequest<R>(
 
     override suspend fun call(build: suspend ContractFunctionRequest.CallBuilder.() -> Unit): ApiResult<R> {
         val builder: ContractFunctionRequest.CallBuilder = this.apply { build() }
-        val result = eth.call(
+        return eth.call(
             CallRequest(
                 from = builder.from,
                 to = contractAddress,
@@ -68,12 +70,11 @@ class EthContractFunctionRequest<R>(
                 data = data,
             ),
             targetBlock
-        )
-        return result.map { function.decodeResult(it) }
+        ).map(convertCallResult)
     }
 
     override suspend fun transaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend ContractFunctionRequest.TransactionBuilder.() -> Unit
     ): ApiResult<Hash> {
         val builder: ContractFunctionRequest.TransactionBuilder = this.apply { build() }

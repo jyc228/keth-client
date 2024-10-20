@@ -1,14 +1,15 @@
 package com.github.jyc228.keth.type
 
+import com.github.jyc228.keth.client.eth.Block
 import com.github.jyc228.keth.client.eth.RpcTransaction
 import com.github.jyc228.keth.client.eth.Transaction
-import com.github.jyc228.keth.client.eth.TransactionHashes
-import com.github.jyc228.keth.client.eth.TransactionObjects
 import com.github.jyc228.keth.client.eth.TransactionStatus
 import com.github.jyc228.keth.client.eth.TransactionType
 import kotlinx.datetime.Instant
 import kotlinx.serialization.DeserializationStrategy
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind
 import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
@@ -19,9 +20,6 @@ import kotlinx.serialization.json.JsonContentPolymorphicSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
-import kotlinx.serialization.modules.SerializersModule
-import kotlinx.serialization.modules.polymorphic
-import kotlinx.serialization.serializer
 
 internal abstract class HexStringSerializer<T : HexString>(val toObject: (String) -> T) : KSerializer<T> {
     override val descriptor = PrimitiveSerialDescriptor(this::class.qualifiedName ?: error(""), PrimitiveKind.STRING)
@@ -52,29 +50,31 @@ internal abstract class NullSerializer<T>(
     override fun deserialize(decoder: Decoder): T = decoder.decodeNullableSerializableValue(serializer) ?: default
 }
 
-internal object TransactionHashesSerializer : KSerializer<TransactionHashes> {
-    private val serializer = ListSerializer(HashSerializer)
+internal object TransactionHashSerializer : KSerializer<Block.TransactionHash> {
+    private val serializer = HashSerializer
     override val descriptor: SerialDescriptor get() = serializer.descriptor
 
-    override fun deserialize(decoder: Decoder): TransactionHashes {
-        return TransactionHashes(serializer.deserialize(decoder))
+    override fun deserialize(decoder: Decoder): Block.TransactionHash {
+        return Block.TransactionHash(serializer.deserialize(decoder))
     }
 
-    override fun serialize(encoder: Encoder, value: TransactionHashes) {
-        serializer.serialize(encoder, value)
+    override fun serialize(encoder: Encoder, value: Block.TransactionHash) {
+        serializer.serialize(encoder, value.hash)
     }
 }
 
-internal object TransactionObjectsSerializer : KSerializer<TransactionObjects> {
-    private val serializer = ListSerializer(serializer<Transaction>())
-    override val descriptor: SerialDescriptor get() = serializer.descriptor
+internal object TransactionObjectSerializer : KSerializer<Block.TransactionObject> {
+    private val defaultSerializer = RpcTransaction.serializer()
+    override val descriptor: SerialDescriptor get() = defaultSerializer.descriptor
 
-    override fun deserialize(decoder: Decoder): TransactionObjects {
-        return TransactionObjects(serializer.deserialize(decoder))
+    @OptIn(ExperimentalSerializationApi::class)
+    override fun deserialize(decoder: Decoder): Block.TransactionObject {
+        val customSerializer = decoder.serializersModule.getPolymorphic(Transaction::class, null)
+        return Block.TransactionObject((customSerializer ?: defaultSerializer).deserialize(decoder))
     }
 
-    override fun serialize(encoder: Encoder, value: TransactionObjects) {
-        serializer.serialize(encoder, value)
+    override fun serialize(encoder: Encoder, value: Block.TransactionObject) {
+        throw SerializationException("Block.TransactionObject serialize unsupported")
     }
 }
 
@@ -97,7 +97,3 @@ internal class NullBlockNumber : NullSerializer<HexULong>(HexULong.serializer(),
 internal class NullTxIndex : NullSerializer<HexInt>(HexInt.serializer(), HexInt(-1))
 internal class NullGas : NullSerializer<HexBigInt>(HexBigInt.serializer(), HexBigInt("0"))
 internal class NullList<E>(element: KSerializer<E>) : NullSerializer<List<E>>(ListSerializer(element), emptyList())
-
-fun createEthSerializersModule(serializer: KSerializer<Transaction>) = SerializersModule {
-    polymorphic(Transaction::class) { defaultDeserializer { serializer } }
-}

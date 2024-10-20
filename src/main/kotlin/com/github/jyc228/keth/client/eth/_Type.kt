@@ -35,10 +35,10 @@ val ULong.ref get() = BlockReference(this)
 val Hash.ref get() = BlockReference.fromHex(this)
 
 @JvmInline
-value class GetBlockOption<T : Transactions> internal constructor(val fullTx: Boolean = false)
+value class GetBlockOption<E : Block.TransactionElement> internal constructor(val fullTx: Boolean = false)
 
-val txHash = GetBlockOption<TransactionHashes>(false)
-val txObject = GetBlockOption<TransactionObjects>(true)
+val txHash = GetBlockOption<Block.TransactionHash>(false)
+val txObject = GetBlockOption<Block.TransactionObject>(true)
 
 class FilterId<T> internal constructor(
     val id: String,

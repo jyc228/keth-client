@@ -1,5 +1,6 @@
 package com.github.jyc228.keth.client.eth
 
+import com.github.jyc228.keth.PrivateAccount
 import com.github.jyc228.keth.client.AbstractJsonRpcApi
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.JsonRpcClientWrapper
@@ -28,10 +29,10 @@ class EthJsonRpcApi(
         false -> "eth_getHeaderByNumber"(ref.value, config.blockHeader)
     }
 
-    override suspend fun <T : Transactions> getBlock(
-        option: GetBlockOption<T>,
+    override suspend fun <E : Block.TransactionElement> getBlock(
+        option: GetBlockOption<E>,
         ref: BlockReference
-    ): ApiResult<Block<T>?> = when (ref.hash) {
+    ): ApiResult<Block<E>?> = when (ref.hash) {
         true -> "eth_getBlockByHash"(ref.value, option.fullTx, config.getBlockSerializer(option))
         false -> "eth_getBlockByNumber"(ref.value, option.fullTx, config.getBlockSerializer(option))
     }
@@ -121,7 +122,7 @@ class EthJsonRpcApi(
         "eth_sendRawTransaction"(signedTransactionData)
 
     override suspend fun sendTransaction(
-        account: com.github.jyc228.keth.AccountWithPrivateKey,
+        account: PrivateAccount,
         build: suspend TransactionBuilder.() -> Unit
     ): ApiResult<Hash> {
         val client = EthJsonRpcApi(client.toImmediateClient(), config)

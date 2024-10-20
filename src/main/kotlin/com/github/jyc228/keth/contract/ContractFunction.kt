@@ -1,6 +1,5 @@
 package com.github.jyc228.keth.contract
 
-import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexString
@@ -26,19 +25,19 @@ abstract class AbstractContractFunction<R>(
 
     protected fun encodeFunctionCall(vararg parameters: Any?): String {
         if (parameters.isEmpty()) return sig
-        val type = abi.inputs.map { it.encodeType() }
-        return "${sig.take(10)}${AbiCodec.encodeParameters(type, parameters.map { (it as? HexString)?.hex ?: it })}"
+        return "${sig.take(10)}${abiCodec.encode(abi.inputs, parameters.map { (it as? HexString)?.hex ?: it })}"
     }
 
-    protected fun decodeFunctionParameter(input: String) = AbiCodec.decodeParameters(
-        abi.inputs.map { it.type },
-        input.drop(10), // remove 0x and function signature (4 bytes)
-    )
+    protected fun decodeFunctionParameter(input: String): List<Any> {
+        val result = abiCodec.decode(abi.inputs, input.drop(10))
+        return abi.inputs.map { result.getValue(it.name) }
+    }
 
     @Suppress("UNCHECKED_CAST")
     fun decodeResult(result: HexData?): R {
         if (result == null) return null as R
-        return AbiCodec.decodeParameters(abi.outputs.map { it.type }, result.hex.removePrefix("0x"))[0] as R
+        val result = abiCodec.decode(abi.outputs, result.hex.removePrefix("0x"))
+        return result.getValue(abi.outputs[0].name) as R
     }
 }
 

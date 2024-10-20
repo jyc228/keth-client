@@ -37,7 +37,7 @@ data class RpcBlockHeader(
 ) : BlockHeader
 
 @Serializable
-data class RpcBlock<T : Transactions>(
+data class RpcBlock<E : Block.TransactionElement>(
     override val baseFeePerGas: HexBigInt? = null,
     override val difficulty: HexBigInt,
     override val extraData: String = "",
@@ -57,7 +57,7 @@ data class RpcBlock<T : Transactions>(
     @Serializable(InstantSerializer::class)
     override val timestamp: Instant,
     override val totalDifficulty: HexBigInt? = null,
-    override val transactions: T,
+    override val transactions: List<E> = emptyList(),
     override val transactionsRoot: Hash,
     override val uncles: List<Hash>,
     override val withdrawals: List<Withdrawal> = emptyList(),
@@ -65,7 +65,7 @@ data class RpcBlock<T : Transactions>(
     override val parentBeaconBlockRoot: Hash? = null,
     override val blobGasUsed: HexBigInt? = null,
     override val excessBlobGas: HexBigInt? = null,
-) : Block<T>
+) : Block<E>
 
 @Serializable
 data class RpcUncleBlock(

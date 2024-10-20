@@ -134,6 +134,7 @@ class ContractBuilder(
             }
             .body {
                 compileResult.functions().forEach { item ->
+                    val functionReference = "$interfaceName.${resolveMetadataPropertyName(item)}"
                     function(item.name!!)
                         .override()
                         .parameters(item.inputs.toParameters())
@@ -144,7 +145,14 @@ class ContractBuilder(
                                 false -> listOf(item.outputToKotlinType() ?: "Unit")
                             }
                         )
-                        .body("""return $interfaceName.${resolveMetadataPropertyName(item)}(${item.inputs.joinToStringNames()})""")
+                        .body(
+                            """
+                            return newRequest(
+                                        $functionReference::decodeResult,
+                                        $functionReference.encodeFunctionCall(${item.inputs.joinToStringNames()}),
+                                    )
+                        """.trimIndent()
+                        )
                     context.reportType("Contract")
                 }
             }

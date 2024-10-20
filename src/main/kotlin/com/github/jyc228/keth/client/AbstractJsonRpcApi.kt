@@ -14,7 +14,7 @@ abstract class AbstractJsonRpcApi(val client: JsonRpcClientWrapper) {
 
     protected suspend inline operator fun <reified T, reified P1> String.invoke(
         p1: P1,
-        serializer: KSerializer<T> = serializer()
+        serializer: KSerializer<out T> = serializer()
     ): ApiResult<T> {
         val inputs = listOf(Json.encodeToJsonElement(p1))
         return client.send(this, JsonArray(inputs), serializer)
@@ -23,7 +23,7 @@ abstract class AbstractJsonRpcApi(val client: JsonRpcClientWrapper) {
     protected suspend inline operator fun <reified T, reified P1, reified P2> String.invoke(
         p1: P1,
         p2: P2,
-        serializer: KSerializer<T> = serializer()
+        serializer: KSerializer<out T> = serializer()
     ): ApiResult<T> {
         val inputs = listOf(Json.encodeToJsonElement(p1), Json.encodeToJsonElement(p2))
         return client.send(this, JsonArray(inputs), serializer)

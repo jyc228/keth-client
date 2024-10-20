@@ -1,11 +1,10 @@
 package com.github.jyc228.keth.contract
 
+import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.contract.Contract.GetEventRequest
-import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
-import com.github.jyc228.keth.type.HexData
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
 import kotlinx.serialization.json.Json
@@ -15,23 +14,14 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     hash: String,
     jsonAbi: () -> String,
 ) {
-    val hash = Hash.fromHexString(hash)
+    val eventSig = Hash.fromHexString(hash)
     private val const = requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
     private val abi: AbiItem by lazy(LazyThreadSafetyMode.NONE) { Json.decodeFromString(jsonAbi()) }
 
-    fun decodeIf(
-        data: HexData,
-        topics: List<HexData> = emptyList()
-    ): EVENT? {
-        return if (topics[0].hex == hash.hex) decode(data, topics) else null
-    }
+    fun decodeIf(log: Log): EVENT? = if (log.topics.getOrNull(0)?.hex == eventSig.hex) decode(log) else null
 
-    fun decode(
-        data: HexData,
-        topics: List<HexData> = emptyList()
-    ): EVENT {
-        requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
-        val resultByName = AbiCodec.decodeLog(abi.inputs, data.hex, topics.map { it.hex })
+    fun decode(log: Log): EVENT {
+        val resultByName = abiCodec.decodeLog(abi.inputs, log)
         val params = const.parameters.associateWith { p -> resultByName[p.name] }
         return const.callBy(params)
     }

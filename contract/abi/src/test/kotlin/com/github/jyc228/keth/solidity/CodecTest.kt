@@ -6,7 +6,6 @@ import io.kotest.datatest.withData
 import io.kotest.matchers.shouldBe
 import io.kotest.matchers.types.shouldBeInstanceOf
 import java.math.BigInteger
-import java.nio.ByteBuffer
 
 @OptIn(ExperimentalStdlibApi::class)
 class CodecTest : DescribeSpec({
@@ -179,8 +178,6 @@ private class EncodeTestBuilder {
     infix fun TC.shouldBe(expected: String) = apply { testCases += this.also { it.expected = expected } }
 }
 
-
-@OptIn(ExperimentalStdlibApi::class)
 private suspend fun <R> ContainerScope.decodeTest(
     convertResult: (Any?) -> R,
     buildTest: DecodeTestBuilder<R>.() -> Unit
@@ -189,9 +186,9 @@ private suspend fun <R> ContainerScope.decodeTest(
         nameFn = { tc -> "${tc.type}(${tc.inputHex})" },
         DecodeTestBuilder<R>().apply(buildTest).testCases
     ) { tc ->
-        val buffer = ByteBuffer.wrap(tc.inputHex.hexToByteArray())
-        convertResult(Codec.decode(tc.type, buffer)) shouldBe tc.expected
-        ByteArray(buffer.remaining()).also { buffer.get(it) }.toHexString() shouldBe tc.remaining
+        val context = Codec.DecodingContext(tc.inputHex, emptyMap())
+        convertResult(Codec.decode(tc.type, context)) shouldBe tc.expected
+        context.readHexString(context.buffer.remaining()) shouldBe tc.remaining
     }
 }
 
