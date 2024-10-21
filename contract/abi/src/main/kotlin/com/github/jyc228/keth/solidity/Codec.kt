@@ -311,23 +311,14 @@ data object TupleCodec : Codec {
     }
 }
 
+@OptIn(ExperimentalStdlibApi::class)
 private fun ByteBuffer.putHexString(hex: String) {
-    val offset = if (hex.startsWith("0x", true)) 2 else 0
-    repeat((hex.length - offset) / 2) { idx ->
-        val hexIndex = (idx * 2) + offset
-        put((charCodeToBase16(hex[hexIndex]) * 16 + charCodeToBase16(hex[hexIndex + 1])).toByte())
+    var hex = hex
+    if (hex.length % 2 == 1) {
+        hex += '0'
     }
+    put(hex.removePrefix("0x").hexToByteArray())
     if (position() % 32 != 0) {
         position(position() + 32 - (position() % 32))
     }
-}
-
-private fun charCodeToBase16(char: Char): Int {
-    if (char in '0'..'9')
-        return char - '0'
-    if (char in 'A'..'F')
-        return char - ('A' - 10)
-    if (char in 'a'..'f')
-        return char - ('a' - 10)
-    error("...")
 }
