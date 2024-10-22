@@ -16,7 +16,8 @@ import kotlinx.serialization.json.Json
 class DefaultEthereumClient(
     private val client: JsonRpcClient,
     private val json: Json,
-    private val serializerConfig: SerializerConfig
+    private val serializerConfig: SerializerConfig,
+    private val batchSize: UInt?,
 ) : EthereumClient {
     private val immediateCall = ImmediateJsonRpcClient(client, json)
     override val eth: EthApi = EthJsonRpcApi(immediateCall, serializerConfig)
@@ -25,16 +26,17 @@ class DefaultEthereumClient(
     override val contract = EthContractApi(eth)
 
     override suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>): List<ApiResult<R>> {
-        return BatchEthereumClient(client, json, serializerConfig).batch(init)
+        return BatchEthereumClient(client, json, serializerConfig, batchSize).batch(init)
     }
 }
 
 class BatchEthereumClient(
     client: JsonRpcClient,
     json: Json,
-    serializerConfig: SerializerConfig
+    serializerConfig: SerializerConfig,
+    batchSize: UInt?,
 ) : EthereumClient {
-    private val batchCall = BatchJsonRpcClient(client, json)
+    private val batchCall = BatchJsonRpcClient(client, json, batchSize)
     override val eth: EthApi = EthJsonRpcApi(batchCall, serializerConfig)
     override val engin: EngineApi = EngineJsonRpcApi(batchCall)
     override val txpool: TxpoolApi = TxpoolJsonRpcApi(batchCall)
@@ -47,9 +49,10 @@ class ScheduledBatchEthereumClient(
     client: JsonRpcClient,
     interval: Duration,
     json: Json,
-    serializerConfig: SerializerConfig
+    serializerConfig: SerializerConfig,
+    batchSize: UInt?,
 ) : EthereumClient {
-    private val scheduledCall = ScheduledJsonRpcClient(client, json, interval)
+    private val scheduledCall = ScheduledJsonRpcClient(client, json, interval, batchSize)
     override val eth: EthApi = EthJsonRpcApi(scheduledCall, serializerConfig)
     override val engin: EngineApi = EngineJsonRpcApi(scheduledCall)
     override val txpool: TxpoolApi = TxpoolJsonRpcApi(scheduledCall)

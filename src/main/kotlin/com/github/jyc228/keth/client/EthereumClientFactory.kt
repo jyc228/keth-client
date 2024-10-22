@@ -26,18 +26,21 @@ fun EthereumClient(url: String, initConfig: (EthereumClientConfig.() -> Unit)? =
             client = JsonRpcClient.from(url, config.adminJwtSecret),
             interval = config.interval,
             json = json,
-            serializerConfig = config.toSerializerConfig()
+            serializerConfig = config.toSerializerConfig(),
+            batchSize = config.batchSize,
         )
     }
     return DefaultEthereumClient(
         client = JsonRpcClient.from(url, config.adminJwtSecret),
         json = json,
-        serializerConfig = config.toSerializerConfig()
+        serializerConfig = config.toSerializerConfig(),
+        batchSize = config.batchSize,
     )
 }
 
 data class EthereumClientConfig(
     var interval: Duration = 0.milliseconds,
+    var batchSize: UInt? = 100u,
     var adminJwtSecret: String? = null,
     var json: (JsonBuilder.() -> Unit)? = null,
     var blockHeaderSerializer: KSerializer<out BlockHeader>? = null,
