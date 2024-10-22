@@ -43,7 +43,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
             logs.map { log ->
                 val eventRequest = requireNotNull(eventRequestByHash[log.topics.first().hex])
                 val decoded = eventRequest.factory.decode(log)
-                eventRequest.subscribe?.invoke(decoded)
+                eventRequest.onEach?.invoke(decoded)
                 decoded to log
             }
         }

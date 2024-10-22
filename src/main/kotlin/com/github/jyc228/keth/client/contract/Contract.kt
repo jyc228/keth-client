@@ -31,9 +31,9 @@ interface Contract<ROOT_EVENT : ContractEvent> {
     class Instance<T : Contract<*>>(val address: Address, internal val factory: Factory<T>)
 
     class GetEventRequest<out EVENT : ContractEvent>(
-        val factory: ContractEventFactory<out EVENT>,
-        val buildTopic: Topics.() -> Unit,
-        var subscribe: ((@UnsafeVariance EVENT) -> Unit)?
+        internal val factory: ContractEventFactory<out EVENT>,
+        internal val buildTopic: Topics.() -> Unit,
+        internal var onEach: ((@UnsafeVariance EVENT) -> Unit)?
     )
 }
 
