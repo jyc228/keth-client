@@ -2,9 +2,9 @@ package com.github.jyc228.keth.client.eth
 
 import com.github.jyc228.keth.PrivateAccount
 import com.github.jyc228.keth.client.ApiResult
+import com.github.jyc228.keth.client.contract.ContractEvent
+import com.github.jyc228.keth.client.contract.ContractEventFactory
 import com.github.jyc228.keth.client.eth.BlockReference.Companion.latest
-import com.github.jyc228.keth.contract.ContractEvent
-import com.github.jyc228.keth.contract.ContractEventFactory
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexBigInt

@@ -1,7 +1,6 @@
 package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.eth.EthApi
-import com.github.jyc228.keth.contract.Contract
 import com.github.jyc228.keth.type.Address
 
 class EthContractApi(

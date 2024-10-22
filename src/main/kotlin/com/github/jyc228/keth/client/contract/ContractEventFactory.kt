@@ -1,8 +1,7 @@
-package com.github.jyc228.keth.contract
+package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.client.eth.Topics
-import com.github.jyc228.keth.contract.Contract.GetEventRequest
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import kotlin.reflect.KClass
@@ -27,14 +26,14 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     }
 }
 
-inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(crossinline buildTopic: Topics.() -> Unit): GetEventRequest<E> {
-    return GetEventRequest(this, { filterByEvent(this@filter).buildTopic() }, null)
+inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(crossinline buildTopic: Topics.() -> Unit): Contract.GetEventRequest<E> {
+    return Contract.GetEventRequest(this, { filterByEvent(this@filter).buildTopic() }, null)
 }
 
-fun <E : ContractEvent, F : ContractEventFactory<E>> F.subscribe(subscribe: (E) -> Unit): GetEventRequest<E> {
-    return GetEventRequest(this, { filterByEvent(this@subscribe) }, subscribe)
+fun <E : ContractEvent, F : ContractEventFactory<E>> F.subscribe(subscribe: (E) -> Unit): Contract.GetEventRequest<E> {
+    return Contract.GetEventRequest(this, { filterByEvent(this@subscribe) }, subscribe)
 }
 
-fun <E : ContractEvent> GetEventRequest<E>.subscribe(subscribe: (E) -> Unit): GetEventRequest<E> {
+fun <E : ContractEvent> Contract.GetEventRequest<E>.subscribe(subscribe: (E) -> Unit): Contract.GetEventRequest<E> {
     return apply { this.subscribe = subscribe }
 }

@@ -1,10 +1,9 @@
-package com.github.jyc228.keth.contract
+package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
 import com.github.jyc228.keth.client.eth.GetLogsRequest
 import com.github.jyc228.keth.client.eth.Log
-import com.github.jyc228.keth.contract.Contract.GetEventRequest
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.HexData
 import kotlin.reflect.full.companionObjectInstance
@@ -32,7 +31,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
     }
 
     override suspend fun getLogs(
-        vararg requests: GetEventRequest<ROOT_EVENT>,
+        vararg requests: Contract.GetEventRequest<ROOT_EVENT>,
         options: (GetLogsRequest.() -> Unit)?
     ): ApiResult<List<Pair<ROOT_EVENT, Log>>> {
         val request = GetLogsRequest(address = mutableSetOf(address)).apply {

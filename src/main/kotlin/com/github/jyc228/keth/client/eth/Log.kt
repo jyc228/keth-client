@@ -1,6 +1,6 @@
 package com.github.jyc228.keth.client.eth
 
-import com.github.jyc228.keth.contract.ContractEventFactory
+import com.github.jyc228.keth.client.contract.ContractEventFactory
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.Hash
 import com.github.jyc228.keth.type.HexData

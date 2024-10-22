@@ -1,4 +1,4 @@
-package com.github.jyc228.keth.contract
+package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
