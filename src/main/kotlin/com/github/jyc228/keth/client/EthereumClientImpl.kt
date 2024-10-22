@@ -25,13 +25,12 @@ class DefaultEthereumClient(
     override val contract = EthContractApi(eth)
 
     override suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>): List<ApiResult<R>> {
-        return BatchEthereumClient(client, contract, json, serializerConfig).batch(init)
+        return BatchEthereumClient(client, json, serializerConfig).batch(init)
     }
 }
 
 class BatchEthereumClient(
     client: JsonRpcClient,
-    contract: EthContractApi,
     json: Json,
     serializerConfig: SerializerConfig
 ) : EthereumClient {
@@ -39,7 +38,7 @@ class BatchEthereumClient(
     override val eth: EthApi = EthJsonRpcApi(batchCall, serializerConfig)
     override val engin: EngineApi = EngineJsonRpcApi(batchCall)
     override val txpool: TxpoolApi = TxpoolJsonRpcApi(batchCall)
-    override val contract: ContractApi = EthContractApi(eth, contract)
+    override val contract: ContractApi = EthContractApi(eth)
     override suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>) =
         batchCall.execute(init(this))
 }
