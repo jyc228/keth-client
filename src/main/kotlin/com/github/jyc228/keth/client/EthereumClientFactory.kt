@@ -14,6 +14,28 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
 
+fun EthereumClient(url: String, initConfig: (EthereumClientConfig.() -> Unit)? = null): EthereumClient {
+    val config = EthereumClientConfig().apply { initConfig?.invoke(this) }
+    val json = Json {
+        ignoreUnknownKeys = true
+        classDiscriminator = ""
+        config.json?.invoke(this)
+    }
+    if (config.interval.isPositive()) {
+        return ScheduledBatchEthereumClient(
+            client = JsonRpcClient.from(url, config.adminJwtSecret),
+            interval = config.interval,
+            json = json,
+            serializerConfig = config.toSerializerConfig()
+        )
+    }
+    return DefaultEthereumClient(
+        client = JsonRpcClient.from(url, config.adminJwtSecret),
+        json = json,
+        serializerConfig = config.toSerializerConfig()
+    )
+}
+
 data class EthereumClientConfig(
     var interval: Duration = 0.milliseconds,
     var adminJwtSecret: String? = null,
@@ -23,24 +45,6 @@ data class EthereumClientConfig(
     var blockWithTxHashesSerializer: KSerializer<out Block<Block.TransactionHash>>? = null,
     var blockWithTxObjectsSerializer: KSerializer<out Block<Block.TransactionObject>>? = null
 )
-
-fun EthereumClient.Companion.fromRpcUrl(
-    url: String,
-    initConfig: (EthereumClientConfig.() -> Unit)? = null
-): EthereumClient {
-    val config = EthereumClientConfig().apply { initConfig?.invoke(this) }
-    val serializerConfig = config.toSerializerConfig()
-    val json = Json {
-        ignoreUnknownKeys = true
-        classDiscriminator = ""
-        config.json?.invoke(this)
-    }
-    val client = JsonRpcClient.from(url, config.adminJwtSecret)
-    if (config.interval.isPositive()) {
-        return ScheduledBatchEthereumClient(client, config.interval, json, serializerConfig)
-    }
-    return DefaultEthereumClient(client, json, serializerConfig)
-}
 
 private fun EthereumClientConfig.toSerializerConfig() = SerializerConfig(
     blockHeader = blockHeaderSerializer ?: RpcBlockHeader.serializer(),
