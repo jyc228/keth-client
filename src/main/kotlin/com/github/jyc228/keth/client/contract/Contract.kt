@@ -25,7 +25,7 @@ interface Contract<ROOT_EVENT : ContractEvent> {
         }
 
         operator fun invoke(address: Address): Instance<T> = Instance(address, this)
-        operator fun invoke(address: String): Instance<T> = Instance(Address.fromHexString(address), this)
+        operator fun invoke(address: String): Instance<T> = Instance(Address(address), this)
     }
 
     class Instance<T : Contract<*>>(val address: Address, internal val factory: Factory<T>)

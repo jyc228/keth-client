@@ -44,7 +44,7 @@ value class Topics(val list: MutableList<MutableList<HexData>?> = MutableList(1)
         apply { bigInt.forEach { insert(index, it.toString(16)) } }
 
     private fun insert(index: Int, hexString: String) = apply {
-        val hex = HexData.fromHexString("0x${hexString.padStart(64, '0')}")
+        val hex = HexData(hexString.padStart(64, '0'))
         if (list.lastIndex < index) {
             repeat(index - list.lastIndex) {
                 list += null

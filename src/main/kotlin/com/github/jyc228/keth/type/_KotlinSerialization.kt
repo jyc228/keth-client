@@ -27,12 +27,12 @@ internal abstract class HexStringSerializer<T : HexString>(val toObject: (String
     override fun deserialize(decoder: Decoder) = toObject(decoder.decodeString().lowercase())
 }
 
-internal object HashSerializer : HexStringSerializer<Hash>(Hash::fromHexString)
-internal object AddressSerializer : HexStringSerializer<Address>(Address::fromHexString)
+internal object HashSerializer : HexStringSerializer<Hash>(Hash::invoke)
+internal object AddressSerializer : HexStringSerializer<Address>(Address::invoke)
 internal object HexIntSerializer : HexStringSerializer<HexInt>(::HexInt)
 internal object HexULongSerializer : HexStringSerializer<HexULong>(::HexULong)
 internal object HexBigIntSerializer : HexStringSerializer<HexBigInt>(::HexBigInt)
-internal object HexDataSerializer : HexStringSerializer<HexData>(HexData::fromHexString)
+internal object HexDataSerializer : HexStringSerializer<HexData>(HexData::invoke)
 
 internal object InstantSerializer : KSerializer<Instant> {
     override val descriptor = PrimitiveSerialDescriptor("com.github.jyc228.keth.Instant", PrimitiveKind.STRING)

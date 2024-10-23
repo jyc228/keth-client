@@ -13,7 +13,7 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     hash: String,
     jsonAbi: () -> String,
 ) {
-    val eventSig = Hash.fromHexString(hash)
+    val eventSig = Hash(hash)
     private val const = requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
     private val abi: AbiItem by lazy(LazyThreadSafetyMode.NONE) { Json.decodeFromString(jsonAbi()) }
 
