@@ -13,10 +13,10 @@ import org.intellij.lang.annotations.Language
 interface Contract<ROOT_EVENT : ContractEvent> {
     suspend fun getLogs(options: (GetLogsRequest.() -> Unit)? = null): ApiResult<List<Pair<ROOT_EVENT, Log>>>
 
-    suspend fun getLogs(
-        vararg requests: GetEventRequest<ROOT_EVENT>,
+    suspend fun <EVENT : ROOT_EVENT> getLogs(
+        vararg requests: GetEventRequest<EVENT>,
         options: (GetLogsRequest.() -> Unit)? = null
-    ): ApiResult<List<Pair<ROOT_EVENT, Log>>>
+    ): ApiResult<List<Pair<EVENT, Log>>>
 
     abstract class Factory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
         protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
@@ -33,7 +33,7 @@ interface Contract<ROOT_EVENT : ContractEvent> {
     class GetEventRequest<out EVENT : ContractEvent>(
         internal val factory: ContractEventFactory<out EVENT>,
         internal val buildTopic: Topics.() -> Unit,
-        internal var onEach: ((@UnsafeVariance EVENT) -> Unit)?
+        internal var onEach: ((@UnsafeVariance EVENT, Log) -> Unit)?
     )
 }
 

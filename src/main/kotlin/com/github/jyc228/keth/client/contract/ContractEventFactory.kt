@@ -30,10 +30,10 @@ inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(cro
     return Contract.GetEventRequest(this, { filterByEvent(this@filter).buildTopic() }, null)
 }
 
-fun <E : ContractEvent, F : ContractEventFactory<E>> F.onEach(callback: (E) -> Unit): Contract.GetEventRequest<E> {
+fun <E : ContractEvent, F : ContractEventFactory<E>> F.onEach(callback: (E, Log) -> Unit): Contract.GetEventRequest<E> {
     return Contract.GetEventRequest(this, { filterByEvent(this@onEach) }, callback)
 }
 
-fun <E : ContractEvent> Contract.GetEventRequest<E>.onEach(callback: (E) -> Unit): Contract.GetEventRequest<E> {
+fun <E : ContractEvent> Contract.GetEventRequest<E>.onEach(callback: (E, Log) -> Unit): Contract.GetEventRequest<E> {
     return apply { this.onEach = callback }
 }
