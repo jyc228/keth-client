@@ -40,8 +40,10 @@ class ImmediateJsonRpcClient(private val client: JsonRpcClient, private val json
     override fun toImmediateClient(): JsonRpcClientWrapper = this
 }
 
-sealed class DeferredJsonRpcClient(protected val client: JsonRpcClient, private val json: Json) :
-    JsonRpcClientWrapper() {
+sealed class DeferredJsonRpcClient(
+    protected val client: JsonRpcClient,
+    private val json: Json,
+) : JsonRpcClientWrapper() {
     private val idGenerator = AtomicLong()
 
     override suspend fun <T> send(
@@ -68,10 +70,18 @@ sealed class DeferredJsonRpcClient(protected val client: JsonRpcClient, private 
     override fun toImmediateClient(): JsonRpcClientWrapper = ImmediateJsonRpcClient(client, json)
 }
 
-class BatchJsonRpcClient(client: JsonRpcClient, json: Json) : DeferredJsonRpcClient(client, json) {
+class BatchJsonRpcClient(
+    client: JsonRpcClient,
+    json: Json,
+    private val batchSize: UInt?
+) : DeferredJsonRpcClient(client, json) {
     @Suppress("UNCHECKED_CAST")
     suspend fun <T> execute(calls: List<ApiResult<T>>): List<ApiResult<T>> {
-        executeAndSendResult(calls as List<DeferredApiResult<T>>)
+        calls as List<DeferredApiResult<T>>
+        when (batchSize == null) {
+            true -> executeAndSendResult(calls)
+            false -> calls.chunked(batchSize.toInt()).forEach { executeAndSendResult(it) }
+        }
         return calls
     }
 }
@@ -80,7 +90,7 @@ class ScheduledJsonRpcClient(
     client: JsonRpcClient,
     json: Json,
     private val interval: Duration,
-    private val maxBatchSize: Int = 999
+    private val batchSize: UInt?,
 ) : DeferredJsonRpcClient(client, json) {
     private val calls = mutableListOf<DeferredApiResult<*>>()
     private val mutex = Mutex()
@@ -100,8 +110,10 @@ class ScheduledJsonRpcClient(
         return super.send(method, params, resultSerializer).also { mutex.withLock { calls += it } }
     }
 
-    private suspend fun collectCalls() = mutex.withLock {
-        val size = min(calls.size, maxBatchSize)
-        buildList(size) { repeat(size) { add(calls.removeFirst()) } }
+    private suspend fun collectCalls(): List<DeferredApiResult<*>> = mutex.withLock {
+        when (batchSize == null) {
+            true -> List(calls.size) { calls.removeFirst() }
+            false -> List(min(calls.size, batchSize.toInt())) { calls.removeFirst() }
+        }
     }
 }

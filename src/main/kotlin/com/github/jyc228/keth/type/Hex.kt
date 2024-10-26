@@ -21,27 +21,20 @@ abstract class HexString {
 
     @OptIn(ExperimentalStdlibApi::class)
     abstract class Factory<T : HexString>(protected val new: (String) -> T) {
-        fun fromHexString(hex: String): T = new(hex.removePrefix("0x").lowercase())
-        fun fromByteArray(bytes: ByteArray): T = new(bytes.toHexString())
+        operator fun invoke(hex: String): T = new(hex.removePrefix("0x").lowercase())
+        operator fun invoke(bytes: ByteArray): T = new(bytes.toHexString())
         fun unsafe(value: String) = new(value)
     }
 }
 
-@OptIn(ExperimentalStdlibApi::class)
 @Serializable(HashSerializer::class)
 class Hash private constructor(override val hex: String) : HexString() {
-    companion object : Factory<Hash>(::Hash) {
-        val ZERO = build {}
-        fun build(size: Int = 32, action: (ByteArray) -> Unit) = Hash(ByteArray(size).apply(action).toHexString())
-    }
+    companion object : Factory<Hash>(::Hash)
 }
 
-@OptIn(ExperimentalStdlibApi::class)
 @Serializable(AddressSerializer::class)
 class Address private constructor(override val hex: String) : HexString() {
-    companion object : Factory<Address>(::Address) {
-        fun build(size: Int = 20, action: (ByteArray) -> Unit) = Address(ByteArray(size).apply(action).toHexString())
-    }
+    companion object : Factory<Address>(::Address)
 }
 
 sealed class HexNumber<T, SELF : HexNumber<T, SELF>>(

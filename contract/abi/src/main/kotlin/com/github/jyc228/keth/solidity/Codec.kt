@@ -159,22 +159,27 @@ data object StringCodec : PrimitiveCodec<String>() {
 data object BytesCodec : PrimitiveCodec<ByteArray>() {
     private val emptyByteArray = byteArrayOf()
     override fun computeEncodeSize(type: Type, data: Any?): Int {
-        if (type.size != null) return 32
-        var size = (data as String).length
-        if (size % 2 == 1) size += 1
-        if (data.startsWith("0x")) size -= 2
-        return 32 + (ceil((size / 2).toFloat() / 32).toInt() * 32)
+        if (type.dynamic) {
+            return 32 + (32 * ceil((data as String).hexBytesLength / 32.0).toInt())
+        }
+        return 32
     }
 
     override fun encode(type: Type, data: Any?, buffer: ByteBuffer) {
         require(data is String) { "unsupported type $data" }
-        if (type.size != null) {
-            return buffer.putHexString(toValidHexString(data))
+        if (type.dynamic) {
+            NumberCodec.encode(data.hexBytesLength, buffer)
         }
-        val hex = toValidHexString(data).removePrefix("0x")
-        NumberCodec.encode(hex.length / 2, buffer)
-        buffer.putHexString(hex)
+        buffer.putHexString(data)
     }
+
+    private val String.hexBytesLength: Int
+        get() {
+            var size = length
+            if (size % 2 == 1) size += 1
+            if (startsWith("0x")) size -= 2
+            return size / 2
+        }
 
     override fun decodeTyped(type: Type, context: Codec.DecodingContext): ByteArray {
         if (type.dynamic) {
@@ -184,13 +189,6 @@ data object BytesCodec : PrimitiveCodec<ByteArray>() {
         }
         return context.read(requireNotNull(type.size)).also { context.skip(32 - it.size) }
     }
-
-    private fun toValidHexString(hex: String): String {
-        if (hex.length % 2 != 0) {
-            return hex + "0"
-        }
-        return hex
-    }
 }
 
 data object AddressCodec : PrimitiveCodec<String>() {
@@ -199,12 +197,9 @@ data object AddressCodec : PrimitiveCodec<String>() {
     override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = encode(data, buffer)
 
     private fun encode(data: Any?, buffer: ByteBuffer) {
-        require(data is String)
-        val address = when (data.startsWith("0x", ignoreCase = true)) {
-            true -> data
-            false -> "0x${data}"
-        }
-        buffer.position(12).putHexString(address)
+        data as String
+        require(data.length == 40 || data.length == 42) { "invalid address length: ${data.length}" }
+        buffer.position(12).putHexString(data)
     }
 
     override fun decodeTyped(type: Type, context: Codec.DecodingContext): String {
@@ -311,23 +306,14 @@ data object TupleCodec : Codec {
     }
 }
 
+@OptIn(ExperimentalStdlibApi::class)
 private fun ByteBuffer.putHexString(hex: String) {
-    val offset = if (hex.startsWith("0x", true)) 2 else 0
-    repeat((hex.length - offset) / 2) { idx ->
-        val hexIndex = (idx * 2) + offset
-        put((charCodeToBase16(hex[hexIndex]) * 16 + charCodeToBase16(hex[hexIndex + 1])).toByte())
+    var hex = hex
+    if (hex.length % 2 == 1) {
+        hex += '0'
     }
+    put(hex.removePrefix("0x").hexToByteArray())
     if (position() % 32 != 0) {
         position(position() + 32 - (position() % 32))
     }
-}
-
-private fun charCodeToBase16(char: Char): Int {
-    if (char in '0'..'9')
-        return char - '0'
-    if (char in 'A'..'F')
-        return char - ('A' - 10)
-    if (char in 'a'..'f')
-        return char - ('a' - 10)
-    error("...")
 }

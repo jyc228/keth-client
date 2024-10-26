@@ -1,8 +1,7 @@
-package com.github.jyc228.keth.contract
+package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.client.eth.Topics
-import com.github.jyc228.keth.contract.Contract.GetEventRequest
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import kotlin.reflect.KClass
@@ -14,7 +13,7 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     hash: String,
     jsonAbi: () -> String,
 ) {
-    val eventSig = Hash.fromHexString(hash)
+    val eventSig = Hash(hash)
     private val const = requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
     private val abi: AbiItem by lazy(LazyThreadSafetyMode.NONE) { Json.decodeFromString(jsonAbi()) }
 
@@ -27,14 +26,14 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     }
 }
 
-inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(crossinline buildTopic: Topics.() -> Unit): GetEventRequest<E> {
-    return GetEventRequest(this, { filterByEvent(this@filter).buildTopic() }, null)
+inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(crossinline buildTopic: Topics.() -> Unit): Contract.GetEventRequest<E> {
+    return Contract.GetEventRequest(this, { filterByEvent(this@filter).buildTopic() }, null)
 }
 
-fun <E : ContractEvent, F : ContractEventFactory<E>> F.subscribe(subscribe: (E) -> Unit): GetEventRequest<E> {
-    return GetEventRequest(this, { filterByEvent(this@subscribe) }, subscribe)
+fun <E : ContractEvent, F : ContractEventFactory<E>> F.onEach(callback: (E, Log) -> Unit): Contract.GetEventRequest<E> {
+    return Contract.GetEventRequest(this, { filterByEvent(this@onEach) }, callback)
 }
 
-fun <E : ContractEvent> GetEventRequest<E>.subscribe(subscribe: (E) -> Unit): GetEventRequest<E> {
-    return apply { this.subscribe = subscribe }
+fun <E : ContractEvent> Contract.GetEventRequest<E>.onEach(callback: (E, Log) -> Unit): Contract.GetEventRequest<E> {
+    return apply { this.onEach = callback }
 }

@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 
 class JsonTest : StringSpec({
     "GetLogsRequest to json" {
-        val address = Address.fromHexString("0x1")
+        val address = Address("0x1")
         Json.encodeToString(GetLogsRequest(address = mutableSetOf(address))) shouldBe """{"address":["0x1"]}"""
 
         Json.encodeToString(

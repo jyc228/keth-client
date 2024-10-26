@@ -1,10 +1,9 @@
-package com.github.jyc228.keth.contract
+package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.ApiResult
 import com.github.jyc228.keth.client.eth.EthApi
 import com.github.jyc228.keth.client.eth.GetLogsRequest
 import com.github.jyc228.keth.client.eth.Log
-import com.github.jyc228.keth.contract.Contract.GetEventRequest
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.HexData
 import kotlin.reflect.full.companionObjectInstance
@@ -31,10 +30,10 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
         }
     }
 
-    override suspend fun getLogs(
-        vararg requests: GetEventRequest<ROOT_EVENT>,
+    override suspend fun <EVENT : ROOT_EVENT> getLogs(
+        vararg requests: Contract.GetEventRequest<EVENT>,
         options: (GetLogsRequest.() -> Unit)?
-    ): ApiResult<List<Pair<ROOT_EVENT, Log>>> {
+    ): ApiResult<List<Pair<EVENT, Log>>> {
         val request = GetLogsRequest(address = mutableSetOf(address)).apply {
             requests.forEach { it.buildTopic(topics) }
             options?.invoke(this)
@@ -44,7 +43,7 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
             logs.map { log ->
                 val eventRequest = requireNotNull(eventRequestByHash[log.topics.first().hex])
                 val decoded = eventRequest.factory.decode(log)
-                eventRequest.subscribe?.invoke(decoded)
+                eventRequest.onEach?.invoke(decoded, log)
                 decoded to log
             }
         }

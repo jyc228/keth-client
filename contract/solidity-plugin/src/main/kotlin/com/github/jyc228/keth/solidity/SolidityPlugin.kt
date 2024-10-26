@@ -3,9 +3,7 @@ package com.github.jyc228.keth.solidity
 import java.io.ByteArrayOutputStream
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.file.Directory
 import org.gradle.api.file.SourceDirectorySet
-import org.gradle.api.provider.Provider
 import org.gradle.api.tasks.SourceSet
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.configurationcache.extensions.capitalized
@@ -21,13 +19,13 @@ class SolidityPlugin : Plugin<Project> {
             if (configSolc(target, extension.solcVersion)) println("solc ${extension.solcVersion}")
         }
 
-        target.extensions.getByType<SourceSetContainer>().forEach {
-            target.tasks.register<GenerateCodeTask>(taskName(it)) {
-                source = createSoliditySourceSet(target, it, extension)
-                outputs.dir(createContractWrapperDirectroy(target, it))
-                dependsOn(target.tasks.getByName("configSolc"))
-                target.tasks.getByName("compileKotlin").dependsOn(this)
+        target.extensions.getByType<SourceSetContainer>().forEach { sourceSet ->
+            val generateCodeTask = target.tasks.register<GenerateCodeTask>(taskName(sourceSet)) {
+                source = createSoliditySourceSet(target, sourceSet, extension)
+                outputs.dir(target.layout.buildDirectory.dir("kotlinContractWrapper/${sourceSet.name}"))
+                sourceSet.java.srcDirs(outputs)
             }
+            target.tasks.getByName("compileKotlin").dependsOn(generateCodeTask)
         }
     }
 
@@ -46,12 +44,6 @@ class SolidityPlugin : Plugin<Project> {
             include("**/*.abi", "**/*.bin")
             if (extension.solcVersion.isNotBlank()) include("**/*.sol")
             sourceSet.resources.srcDirs(this)
-        }
-    }
-
-    private fun createContractWrapperDirectroy(target: Project, sourceSet: SourceSet): Provider<Directory> {
-        return target.layout.buildDirectory.dir("kotlinContractWrapper/${sourceSet.name}").apply {
-            sourceSet.java.srcDirs(this)
         }
     }
 

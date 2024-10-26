@@ -1,4 +1,4 @@
-package com.github.jyc228.keth.contract
+package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.solidity.AbiCodec
@@ -6,8 +6,8 @@ import com.github.jyc228.keth.solidity.AbiCodecImpl
 import com.github.jyc228.keth.solidity.AbiInput
 import com.github.jyc228.keth.type.Address
 
-internal val abiCodec = AbiCodecImpl().apply {
-    registerPrimitiveTypeConverter("address") { Address.fromHexString(it as String) }
+internal val abiCodec: AbiCodec = AbiCodecImpl().apply {
+    registerPrimitiveTypeConverter("address") { Address(it as String) }
 }
 
 fun AbiCodec.decodeLog(
