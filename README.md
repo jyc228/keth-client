@@ -32,9 +32,9 @@ in [EthereumClientFactory.kt](src/main/kotlin/com/github/jyc228/keth/client/Ethe
 
 ```kotlin
 suspend fun main() {
-    EthereumClient("https://ethereum.blockpi.network/v1/rpc/public") // Send all requests immediately
+  EthereumClient("https://... or wss://...") // Send all requests immediately
 
-    EthereumClient("https://ethereum.blockpi.network/v1/rpc/public") {
+  EthereumClient("https://... or wss://...") {
         interval = 100.milliseconds // Collect requests and send in batch every 100 milliseconds
         batchSize = 10u // Send 10 requests at a time
     }
@@ -50,7 +50,7 @@ The `batchSize` property also applies here.
 
 ```kotlin
 suspend fun main() {
-    val client = EthereumClient("https://ethereum.blockpi.network/v1/rpc/public")
+    val client = EthereumClient("https://... or wss://...")
 
     // 10 HTTP requests will be sent.
     client.eth.getBlocks(1uL..10uL, txHash).awaitAllOrThrow()
@@ -83,7 +83,7 @@ Sample code for interacting with the network using the auto-generated [ERC20.kt]
 
 ```kotlin
 suspend fun main() {
-    val client = EthereumClient("https://ethereum.blockpi.network/v1/rpc/public")
+    val client = EthereumClient("https://... or wss://...")
     val usdt = ERC20("0xdAC17F958D2ee523a2206206994597C13D831ec7")
     val tokenHolders = listOf(...)
 
