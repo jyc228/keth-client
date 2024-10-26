@@ -29,7 +29,7 @@ class ContractBuilder(
 
             companionObject()
                 .inherit {
-                    `class`("Contract.Factory")
+                    `class`("ContractFactory")
                         .typeParameter(interfaceName)
                         .invokeConstructor("::${interfaceName}Impl")
                 }

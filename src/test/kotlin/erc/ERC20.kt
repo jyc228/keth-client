@@ -3,6 +3,7 @@ package erc
 import com.github.jyc228.keth.client.contract.Contract
 import com.github.jyc228.keth.client.contract.ContractEvent
 import com.github.jyc228.keth.client.contract.ContractEventFactory
+import com.github.jyc228.keth.client.contract.ContractFactory
 import com.github.jyc228.keth.client.contract.ContractFunctionP0
 import com.github.jyc228.keth.client.contract.ContractFunctionP1
 import com.github.jyc228.keth.client.contract.ContractFunctionP2
@@ -61,7 +62,7 @@ interface ERC20 : Contract<ERC20.Event> {
         }
     }
 
-    companion object : Contract.Factory<ERC20>(::ERC20Impl) {
+    companion object : ContractFactory<ERC20>(::ERC20Impl) {
         val allowance = ContractFunctionP2(
             ERC20::allowance,
             "0xdd62ed3e90e97b3d417db9c0c7522647811bafca5afc6694f143588d255fdfb4"

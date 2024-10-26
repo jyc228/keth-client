@@ -15,6 +15,7 @@ internal fun GenerationContext.Companion.new() = GenerationContext {
         "Topics" -> "com.github.jyc228.keth.client.eth.Topics"
         "AbstractContract" -> "com.github.jyc228.keth.client.contract.AbstractContract"
         "Contract" -> "com.github.jyc228.keth.client.contract.Contract"
+        "ContractFactory" -> "com.github.jyc228.keth.client.contract.ContractFactory"
         "ContractEvent" -> "com.github.jyc228.keth.client.contract.ContractEvent"
         "ContractEventFactory" -> "com.github.jyc228.keth.client.contract.ContractEventFactory"
         "ContractFunctionP0" -> "com.github.jyc228.keth.client.contract.ContractFunctionP0"

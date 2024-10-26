@@ -18,16 +18,6 @@ interface Contract<ROOT_EVENT : ContractEvent> {
         options: (GetLogsRequest.() -> Unit)? = null
     ): ApiResult<List<Pair<EVENT, Log>>>
 
-    abstract class Factory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
-        protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
-            val abi: AbiItem = Json.decodeFromString(jsonAbi)
-            return abiCodec.encode(abi.inputs, args.toList())
-        }
-
-        operator fun invoke(address: Address): ContractAccessor<T> = ContractAccessor(address, this)
-        operator fun invoke(address: String): ContractAccessor<T> = ContractAccessor(Address(address), this)
-    }
-
     class GetEventRequest<out EVENT : ContractEvent>(
         internal val factory: ContractEventFactory<out EVENT>,
         internal val buildTopic: Topics.() -> Unit,
@@ -37,4 +27,14 @@ interface Contract<ROOT_EVENT : ContractEvent> {
 
 interface ContractEvent
 
-class ContractAccessor<T : Contract<*>>(val address: Address, internal val factory: Contract.Factory<T>)
+class ContractAccessor<T : Contract<*>>(val address: Address, internal val factory: ContractFactory<T>)
+
+abstract class ContractFactory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
+    protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
+        val abi: AbiItem = Json.decodeFromString(jsonAbi)
+        return abiCodec.encode(abi.inputs, args.toList())
+    }
+
+    operator fun invoke(address: Address): ContractAccessor<T> = ContractAccessor(address, this)
+    operator fun invoke(address: String): ContractAccessor<T> = ContractAccessor(Address(address), this)
+}
