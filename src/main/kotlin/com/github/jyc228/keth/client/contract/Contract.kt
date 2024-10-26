@@ -24,11 +24,9 @@ interface Contract<ROOT_EVENT : ContractEvent> {
             return abiCodec.encode(abi.inputs, args.toList())
         }
 
-        operator fun invoke(address: Address): Instance<T> = Instance(address, this)
-        operator fun invoke(address: String): Instance<T> = Instance(Address(address), this)
+        operator fun invoke(address: Address): ContractAccessor<T> = ContractAccessor(address, this)
+        operator fun invoke(address: String): ContractAccessor<T> = ContractAccessor(Address(address), this)
     }
-
-    class Instance<T : Contract<*>>(val address: Address, internal val factory: Factory<T>)
 
     class GetEventRequest<out EVENT : ContractEvent>(
         internal val factory: ContractEventFactory<out EVENT>,
@@ -38,3 +36,5 @@ interface Contract<ROOT_EVENT : ContractEvent> {
 }
 
 interface ContractEvent
+
+class ContractAccessor<T : Contract<*>>(val address: Address, internal val factory: Contract.Factory<T>)

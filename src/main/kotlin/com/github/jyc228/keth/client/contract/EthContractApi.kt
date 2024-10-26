@@ -9,7 +9,7 @@ class EthContractApi(
     private val cache = mutableMapOf<Address, Contract<*>>()
 
     @Suppress("UNCHECKED_CAST")
-    override fun <T : Contract<*>> get(contract: Contract.Instance<T>): T {
+    override fun <T : Contract<*>> get(contract: ContractAccessor<T>): T {
         return cache[contract.address] as? T?
             ?: contract.factory.create(contract.address, eth).also { cache[contract.address] = it }
     }
