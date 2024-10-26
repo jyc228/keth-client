@@ -23,7 +23,7 @@ fun EthereumClient(url: String, initConfig: (EthereumClientConfig.() -> Unit)? =
     }
     if (config.interval.isPositive()) {
         return ScheduledBatchEthereumClient(
-            client = JsonRpcClient.from(url, config.adminJwtSecret),
+            client = JsonRpcClient(url, config.adminJwtSecret),
             interval = config.interval,
             json = json,
             serializerConfig = config.toSerializerConfig(),
@@ -31,7 +31,7 @@ fun EthereumClient(url: String, initConfig: (EthereumClientConfig.() -> Unit)? =
         )
     }
     return DefaultEthereumClient(
-        client = JsonRpcClient.from(url, config.adminJwtSecret),
+        client = JsonRpcClient(url, config.adminJwtSecret),
         json = json,
         serializerConfig = config.toSerializerConfig(),
         batchSize = config.batchSize,

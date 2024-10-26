@@ -17,7 +17,6 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import java.util.Date
 
-// https://www.jsonrpc.org/
 internal class JsonRpcKtorHttpClient(
     private val http: HttpClient,
     private val algorithm: Algorithm? = null
