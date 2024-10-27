@@ -8,6 +8,9 @@ package com.github.jyc228.keth.client.contract
  * The automatically generated interface itself is a callable function.
  * When called, a [ContractAccessor] object is created and you can interact with it using the [get] function.
  *
+ * The [com.github.jyc228.keth.client.contract.library] package provides default wrappers for commonly used contracts.
+ * The contracts in this package can be used without Gradle plugin configuration.
+ *
  * Additionally, all RPCs used through the contract can be batch processed.
  * ```kotlin
  * val client = EthereumClient("https://... or wss://...")
