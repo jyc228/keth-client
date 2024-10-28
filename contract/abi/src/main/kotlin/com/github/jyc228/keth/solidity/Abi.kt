@@ -36,19 +36,19 @@ interface AbiComponent {
 }
 
 @Serializable
-data class AbiInput(
+data class IndexableAbiComponent(
     override val name: String,
     override val type: String,
-    override val components: List<AbiInput> = emptyList(),
+    override val components: List<SimpleAbiComponent> = emptyList(),
     override val internalType: String? = null,
     val indexed: Boolean? = null,
 ) : AbiComponent
 
 @Serializable
-data class AbiOutput(
+data class SimpleAbiComponent(
     override val name: String,
     override val type: String,
-    override val components: List<AbiOutput> = emptyList(),
+    override val components: List<SimpleAbiComponent> = emptyList(),
     override val internalType: String? = null,
 ) : AbiComponent
 
@@ -56,9 +56,9 @@ data class AbiOutput(
 data class AbiItem(
     val anonymous: Boolean? = null,
     val constant: Boolean? = null,
-    val inputs: List<AbiInput> = emptyList(),
+    val inputs: List<IndexableAbiComponent> = emptyList(),
     val name: String? = null,
-    val outputs: List<AbiOutput> = emptyList(),
+    val outputs: List<SimpleAbiComponent> = emptyList(),
     val payable: Boolean? = null,
     val stateMutability: StateMutabilityType? = null,
     val type: AbiType? = null,

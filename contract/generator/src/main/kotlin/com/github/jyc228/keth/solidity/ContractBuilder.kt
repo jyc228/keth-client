@@ -167,10 +167,10 @@ class ContractBuilder(
         return item.name!!
     }
 
-    private fun List<AbiInput>.toParameters() =
+    private fun List<IndexableAbiComponent>.toParameters() =
         mapIndexed { i, input -> input.name.ifBlank { "key$i" } to input.typeToKotlin }
 
-    private fun List<AbiInput>.joinToStringNames() =
+    private fun List<IndexableAbiComponent>.joinToStringNames() =
         withIndex().joinToString(", ") { (idx, input) -> input.name.ifBlank { "key$idx" } }
 
     private fun AbiItem.toJsonStringTemplate() = "\"\"\"${Json.encodeToString(this)}\"\"\""
