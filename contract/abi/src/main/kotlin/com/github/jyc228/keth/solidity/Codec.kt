@@ -28,10 +28,6 @@ sealed interface Codec {
     }
 
     companion object : Codec {
-        fun encode(type: Type, data: Any?): ByteArray {
-            return ByteBuffer.allocate(computeEncodeSize(type, data)).also { encode(type, data, it) }.array()
-        }
-
         override fun computeEncodeSize(type: Type, data: Any?): Int = selectCodec(type).computeEncodeSize(type, data)
         override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = selectCodec(type).encode(type, data, buffer)
         override fun decode(type: Type, context: DecodingContext): Any = selectCodec(type).decode(type, context)
@@ -316,4 +312,11 @@ private fun ByteBuffer.putHexString(hex: String) {
     if (position() % 32 != 0) {
         position(position() + 32 - (position() % 32))
     }
+}
+
+@OptIn(ExperimentalStdlibApi::class)
+internal fun Codec.Companion.encode(type: Type, data: Any?): String {
+    val buffer = ByteBuffer.allocate(computeEncodeSize(type, data))
+    encode(type, data, buffer)
+    return buffer.array().toHexString()
 }
