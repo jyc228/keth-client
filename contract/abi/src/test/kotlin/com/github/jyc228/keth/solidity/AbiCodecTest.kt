@@ -6,7 +6,6 @@ import io.kotest.matchers.shouldBe
 import io.kotest.matchers.string.shouldBeEqualIgnoringCase
 import io.kotest.matchers.types.shouldBeInstanceOf
 import java.math.BigInteger
-import kotlinx.serialization.json.Json
 
 @OptIn(ExperimentalStdlibApi::class)
 internal class AbiCodecTest : DescribeSpec({
@@ -15,7 +14,7 @@ internal class AbiCodecTest : DescribeSpec({
         it("Transfer") {
             val abi =
                 // https://etherscan.io/tx/0xdd377131912e9ac4ca74a60135dc3c9ac7a416d2b956315c34e34432a9bfae9f#eventlog
-                Json.decodeFromString<AbiItem>("""{"inputs":[{"name":"recipient","type":"address","internalType":"address"},{"name":"amount","type":"uint256","internalType":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"nonpayable","type":"function"}""")
+                AbiItem.fromJson("""{"inputs":[{"name":"recipient","type":"address","internalType":"address"},{"name":"amount","type":"uint256","internalType":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool","internalType":"bool"}],"stateMutability":"nonpayable","type":"function"}""")
 
             val result = AbiCodec.encode(
                 abi.inputs,
@@ -29,7 +28,7 @@ internal class AbiCodecTest : DescribeSpec({
     context("decodeParameters") {
         it("setL1BlockValues") {
             val abi =
-                Json.decodeFromString<AbiItem>("""{"inputs":[{"internalType":"uint64","name":"_number","type":"uint64"},{"internalType":"uint64","name":"_timestamp","type":"uint64"},{"internalType":"uint256","name":"_basefee","type":"uint256"},{"internalType":"bytes32","name":"_hash","type":"bytes32"},{"internalType":"uint64","name":"_sequenceNumber","type":"uint64"},{"internalType":"bytes32","name":"_batcherHash","type":"bytes32"},{"internalType":"uint256","name":"_l1FeeOverhead","type":"uint256"},{"internalType":"uint256","name":"_l1FeeScalar","type":"uint256"}],"name":"setL1BlockValues","outputs":[],"stateMutability":"nonpayable","type":"function"}""")
+                AbiItem.fromJson("""{"inputs":[{"internalType":"uint64","name":"_number","type":"uint64"},{"internalType":"uint64","name":"_timestamp","type":"uint64"},{"internalType":"uint256","name":"_basefee","type":"uint256"},{"internalType":"bytes32","name":"_hash","type":"bytes32"},{"internalType":"uint64","name":"_sequenceNumber","type":"uint64"},{"internalType":"bytes32","name":"_batcherHash","type":"bytes32"},{"internalType":"uint256","name":"_l1FeeOverhead","type":"uint256"},{"internalType":"uint256","name":"_l1FeeScalar","type":"uint256"}],"name":"setL1BlockValues","outputs":[],"stateMutability":"nonpayable","type":"function"}""")
 
             val hex =
                 "0x015d8eb9000000000000000000000000000000000000000000000000000000000006cf4900000000000000000000000000000000000000000000000000000000639833b0000000000000000000000000000000000000000000000000000000000000000751c54ac1869a3f078ff0aa2994f27f6aceb5d2bda18ec30f2593fa20d9c052fa000000000000000000000000000000000000000000000000000000000000000000000000000000000000000016cb0a409497493c2ef7688f69534fd8f8f23b74000000000000000000000000000000000000000000000000000000000000083400000000000000000000000000000000000000000000000000000000000f4240"
@@ -51,7 +50,7 @@ internal class AbiCodecTest : DescribeSpec({
         it("exactInputSingle") {
             // https://etherscan.io/tx/0xff88cc410593c399697faf3ac6c4debbba05ef81ecd1843d18c4ef51e0214bdd
             val abi =
-                Json.decodeFromString<AbiItem>("""{"inputs":[{"components":[{"internalType":"address","name":"tokenIn","type":"address"},{"internalType":"address","name":"tokenOut","type":"address"},{"internalType":"uint24","name":"fee","type":"uint24"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint256","name":"amountIn","type":"uint256"},{"internalType":"uint256","name":"amountOutMinimum","type":"uint256"},{"internalType":"uint160","name":"sqrtPriceLimitX96","type":"uint160"}],"internalType":"struct ISwapRouter.ExactInputSingleParams","name":"params","type":"tuple"}],"name":"exactInputSingle","outputs":[{"internalType":"uint256","name":"amountOut","type":"uint256"}],"stateMutability":"payable","type":"function"}""")
+                AbiItem.fromJson("""{"inputs":[{"components":[{"internalType":"address","name":"tokenIn","type":"address"},{"internalType":"address","name":"tokenOut","type":"address"},{"internalType":"uint24","name":"fee","type":"uint24"},{"internalType":"address","name":"recipient","type":"address"},{"internalType":"uint256","name":"deadline","type":"uint256"},{"internalType":"uint256","name":"amountIn","type":"uint256"},{"internalType":"uint256","name":"amountOutMinimum","type":"uint256"},{"internalType":"uint160","name":"sqrtPriceLimitX96","type":"uint160"}],"internalType":"struct ISwapRouter.ExactInputSingleParams","name":"params","type":"tuple"}],"name":"exactInputSingle","outputs":[{"internalType":"uint256","name":"amountOut","type":"uint256"}],"stateMutability":"payable","type":"function"}""")
 
             val hex =
                 "0x414bf389000000000000000000000000626e8036deb333b408be468f951bdb42433cbf18000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000009c4000000000000000000000000b1b2d032aa2f52347fbcfd08e5c3cc55216e84040000000000000000000000000000000000000000000000000000000066eae2d90000000000000000000000000000000000000000000002ac2d322ac7ef76e4000000000000000000000000000000000000000000000000001c73c927940973000000000000000000000000000000000000000000000000000000000000000000"

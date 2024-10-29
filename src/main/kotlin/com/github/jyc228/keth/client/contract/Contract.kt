@@ -7,7 +7,6 @@ import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Address
-import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 
 interface Contract<ROOT_EVENT : ContractEvent> {
@@ -31,8 +30,7 @@ class ContractAccessor<T : Contract<*>>(val address: Address, internal val facto
 
 abstract class ContractFactory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
     protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
-        val abi: AbiItem = Json.decodeFromString(jsonAbi)
-        return abiCodec.encode(abi.inputs, args.toList())
+        return abiCodec.encode(AbiItem.fromJson(jsonAbi).inputs, args.toList())
     }
 
     operator fun invoke(address: Address): ContractAccessor<T> = ContractAccessor(address, this)

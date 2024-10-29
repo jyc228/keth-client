@@ -6,7 +6,6 @@ import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import kotlin.reflect.KClass
 import kotlin.reflect.full.primaryConstructor
-import kotlinx.serialization.json.Json
 
 abstract class ContractEventFactory<EVENT : ContractEvent>(
     private val event: KClass<EVENT>,
@@ -15,7 +14,7 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
 ) {
     val eventSig = Hash(hash)
     private val const = requireNotNull(event.primaryConstructor) { "${event.simpleName} primaryConstructor not exist" }
-    private val abi: AbiItem by lazy(LazyThreadSafetyMode.NONE) { Json.decodeFromString(jsonAbi()) }
+    private val abi by lazy(LazyThreadSafetyMode.NONE) { AbiItem.fromJson(jsonAbi()) }
 
     fun decodeIf(log: Log): EVENT? = if (log.topics.getOrNull(0)?.hex == eventSig.hex) decode(log) else null
 

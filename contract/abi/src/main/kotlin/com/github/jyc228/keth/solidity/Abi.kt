@@ -1,10 +1,15 @@
 package com.github.jyc228.keth.solidity
 
+import java.io.InputStream
 import java.math.BigInteger
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import org.bouncycastle.util.encoders.Hex
+import org.intellij.lang.annotations.Language
 
 interface AbiComponent {
     val name: String
@@ -67,6 +72,14 @@ data class AbiItem(
 ) {
     fun ioAsSequence(): Sequence<AbiComponent> = inputs.asSequence() + outputs.asSequence()
     fun computeSig(): String = "${name}(${inputs.joinToString(",") { it.type }})".keccak256Hash()
+
+    companion object {
+        fun fromJson(@Language("json") json: String): AbiItem = Json.decodeFromString(json)
+        fun listFromJson(@Language("json") json: String): List<AbiItem> = Json.decodeFromString(json)
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun listFromJsonStream(stream: InputStream): List<AbiItem> = Json.decodeFromStream(stream)
+    }
 }
 
 enum class StateMutabilityType {

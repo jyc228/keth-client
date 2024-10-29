@@ -2,7 +2,6 @@ package com.github.jyc228.keth.solidity
 
 import com.github.jyc228.keth.solidity.compile.CompileResult
 import java.io.File
-import kotlinx.serialization.json.Json
 
 data class ContractGenerator(
     private val abiRootDir: File,
@@ -20,7 +19,7 @@ data class ContractGenerator(
             packagePath = abiFile.relativeTo(abiRootDir).parent?.replace("/", ".") ?: "",
             compileResult = CompileResult(
                 abiFile.name.replace(".abi", ""),
-                Json.decodeFromString<List<AbiItem>>(abiFile.readText()),
+                AbiItem.listFromJsonStream(abiFile.inputStream()),
                 if (binFile.exists()) binFile.readText() else ""
             )
         )
