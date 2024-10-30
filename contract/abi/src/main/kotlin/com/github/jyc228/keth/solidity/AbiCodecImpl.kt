@@ -11,6 +11,10 @@ class AbiCodecImpl : AbiCodec {
         return convertToMap(components, result)
     }
 
+    override fun decode(type: String, hex: String): Any {
+        return Codec.decode(Type.of(type), Codec.DecodingContext(hex, primitiveValueConverter))
+    }
+
     private fun convertToMap(components: List<AbiComponent>, result: List<*>): Map<String, Any> {
         return components.withIndex().associateBy({ (_, c) -> c.name }, { (i, c) ->
             when (c.type) {
