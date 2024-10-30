@@ -1,22 +1,22 @@
 package com.github.jyc228.keth.client.txpool
 
-import com.github.jyc228.keth.client.eth.RpcTransaction
+import com.github.jyc228.keth.client.eth.Transaction
 import com.github.jyc228.keth.type.Address
 import com.github.jyc228.keth.type.HexInt
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class TxpoolContent(
-    val pending: Map<Address, Map<Int, RpcTransaction>>,
-    val queued: Map<Address, Map<Int, RpcTransaction>>
+    val pending: Map<Address, Map<Int, Transaction>>,
+    val queued: Map<Address, Map<Int, Transaction>>
 ) {
     fun keys() = pending.keys + queued.keys
 }
 
 @Serializable
 data class TxpoolContentFrom(
-    val pending: Map<Int, RpcTransaction>,
-    val queued: Map<Int, RpcTransaction>
+    val pending: Map<Int, Transaction>,
+    val queued: Map<Int, Transaction>
 ) {
     fun keys() = pending.keys + queued.keys
 }
