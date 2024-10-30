@@ -5,6 +5,7 @@ import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import kotlin.reflect.KClass
+import kotlin.reflect.KParameter
 import kotlin.reflect.full.primaryConstructor
 
 abstract class ContractEventFactory<EVENT : ContractEvent>(
@@ -20,8 +21,16 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
 
     fun decode(log: Log): EVENT {
         val resultByName = abiCodec.decodeLog(abi.inputs, log)
-        val params = const.parameters.associateWith { p -> resultByName[p.name] }
+        val params = const.parameters.associateWith { p -> processValue(p, resultByName[p.name]) }
         return const.callBy(params)
+    }
+
+    private fun processValue(p: KParameter, value: Any?): Any? {
+        if (value == null) return null
+        if (p.type.classifier == value::class) return value
+        val const = (p.type.classifier as KClass<*>).primaryConstructor!!
+        value as Map<String, Any>
+        return const.callBy(const.parameters.associateWith { processValue(it, value[it.name]) })
     }
 }
 
