@@ -71,7 +71,7 @@ data class AbiItem(
     val gas: BigInteger? = null,
 ) {
     fun ioAsSequence(): Sequence<AbiComponent> = inputs.asSequence() + outputs.asSequence()
-    fun computeSig(): String = "${name}(${inputs.joinToString(",") { it.type }})".keccak256Hash()
+    fun computeSig(): String = "${name}(${inputs.joinToString(",") { it.encodeType() }})".keccak256Hash()
 
     companion object {
         fun fromJson(@Language("json") json: String): AbiItem = Json.decodeFromString(json)
