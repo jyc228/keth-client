@@ -157,6 +157,18 @@ class CodecTest : DescribeSpec({
                 // @formatter:on
             }
         }
+
+        it("encode, decode") {
+            val input = listOf(
+                "0x96f14f89b3f3368f23fcd78876e2bb9290ad246b",
+                listOf(1.toBigInteger(), 2.toBigInteger()),
+                listOf(true, 3.toBigInteger())
+            )
+
+            val hex = AbiCodec.encode("(address,uint256[],(bool,uint8))", input)
+            val output = AbiCodec.decode("(address,uint256[],(bool,uint8))", hex)
+            input shouldBe output
+        }
     }
 })
 

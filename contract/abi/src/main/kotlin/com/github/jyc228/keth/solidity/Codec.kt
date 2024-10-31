@@ -268,9 +268,11 @@ data object TupleCodec : Codec {
         asSequence(type, data).forEach { (type, data) ->
             if (type.dynamic) {
                 NumberCodec.encode(staticSize + dynamicSize, buffer)
-                val start = buffer.position()
-                Codec.encode(type, data, buffer)
+                val headerPosition = buffer.position()
+                val start = staticSize + dynamicSize
+                Codec.encode(type, data, buffer.position(start))
                 dynamicSize += buffer.position() - start
+                buffer.position(headerPosition)
             } else {
                 Codec.encode(type, data, buffer)
             }
