@@ -55,6 +55,16 @@ interface AbiCodec {
     fun encode(components: List<AbiComponent>, values: List<*>): String
 
     /**
+     * Encodes a low-level function using only the [type]. Acceptable formats are as follows:
+     * - single: Refer to [AbiCodec] Solidity types
+     * - array: type[] (e.g., int[], uint256[])
+     * - tuple: (type1, type2, ...) (e.g., (address,uint256[]))
+     *
+     * @return hex string without 0x prefix and sig
+     */
+    fun encode(type: String, value: Any): String
+
+    /**
      * Overrides the type conversion defined in [AbiCodec]. Currently, it is only applied when [decode] is called
      */
     fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any)

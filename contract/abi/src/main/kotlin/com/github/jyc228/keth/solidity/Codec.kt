@@ -315,7 +315,7 @@ private fun ByteBuffer.putHexString(hex: String) {
 }
 
 @OptIn(ExperimentalStdlibApi::class)
-internal fun Codec.Companion.encode(type: Type, data: Any?): String {
+internal fun Codec.Companion.encode(type: Type, data: Any): String {
     val buffer = ByteBuffer.allocate(computeEncodeSize(type, data))
     encode(type, data, buffer)
     return buffer.array().toHexString()

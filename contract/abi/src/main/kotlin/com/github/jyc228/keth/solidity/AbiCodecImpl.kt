@@ -34,6 +34,8 @@ class AbiCodecImpl : AbiCodec {
         values: List<*>
     ) = Codec.encode(components.toTupleType(), values)
 
+    override fun encode(type: String, value: Any): String = Codec.encode(Type.of(type), value)
+
     override fun registerPrimitiveTypeConverter(typeName: String, converter: (Any) -> Any) {
         primitiveValueConverter[typeName] = converter
     }
