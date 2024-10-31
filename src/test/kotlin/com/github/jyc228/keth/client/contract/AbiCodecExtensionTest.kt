@@ -25,14 +25,14 @@ class AbiCodecExtensionTest : DescribeSpec({
                 "0x000000000000000000000000000000000000000000000000000000000003ad3b"
             )
 
-            val result = AbiCodec.decodeLog(abi.inputs, hex, topics)
+            val result = AbiCodec.decodeLog(abi.inputs, topics, hex)
 
-            result["_batchIndex"].shouldBeInstanceOf<BigInteger>() shouldBe 240955.toBigInteger()
-            result["_batchRoot"].shouldBeInstanceOf<ByteArray>()
+            result[0].shouldBeInstanceOf<BigInteger>() shouldBe 240955.toBigInteger()
+            result[1].shouldBeInstanceOf<ByteArray>()
                 .toHexString() shouldBeEqualIgnoringCase "8C5B901F0037E84123EC2C8289BA4771B95052385BA97DA5F39461C26CA0125E"
-            result["_batchSize"].shouldBeInstanceOf<BigInteger>() shouldBe 77.toBigInteger()
-            result["_prevTotalElements"].shouldBeInstanceOf<BigInteger>() shouldBe 33290334.toBigInteger()
-            result["_extraData"].shouldBeInstanceOf<ByteArray>() shouldHaveSize 0
+            result[2].shouldBeInstanceOf<BigInteger>() shouldBe 77.toBigInteger()
+            result[3].shouldBeInstanceOf<BigInteger>() shouldBe 33290334.toBigInteger()
+            result[4].shouldBeInstanceOf<ByteArray>() shouldHaveSize 0
         }
 
         it("Transfer") {
@@ -49,11 +49,11 @@ class AbiCodecExtensionTest : DescribeSpec({
                 "0x0000000000000000000000002b8a6034c83706aacc846ddc4a2c8e943c09ae44",
             )
 
-            val result = AbiCodec.decodeLog(abi.inputs, hex, topics)
+            val result = AbiCodec.decodeLog(abi.inputs, topics, hex)
 
-            result["from"].shouldBeInstanceOf<String>() shouldBeEqualIgnoringCase "0xCb983A3178aD960d8ED7288cD9D66c6B4b2B5F66"
-            result["to"].shouldBeInstanceOf<String>() shouldBeEqualIgnoringCase "0x2b8A6034c83706aacC846ddc4a2c8E943C09aE44"
-            result["value"].shouldBeInstanceOf<BigInteger>() shouldBe 60220000.toBigInteger()
+            result[0].shouldBeInstanceOf<String>() shouldBeEqualIgnoringCase "0xCb983A3178aD960d8ED7288cD9D66c6B4b2B5F66"
+            result[1].shouldBeInstanceOf<String>() shouldBeEqualIgnoringCase "0x2b8A6034c83706aacC846ddc4a2c8E943C09aE44"
+            result[2].shouldBeInstanceOf<BigInteger>() shouldBe 60220000.toBigInteger()
         }
     }
 })

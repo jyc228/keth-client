@@ -13,15 +13,15 @@ internal val abiCodec: AbiCodec = AbiCodecImpl().apply {
 fun AbiCodec.decodeLog(
     inputs: List<IndexableAbiComponent>,
     log: Log
-): Map<String, Any> = decodeLog(inputs, log.data.hex, log.topics.map { it.hex })
+): Array<Any> = decodeLog(inputs, log.topics.map { it.hex }, log.data.hex)
 
-fun AbiCodec.decodeLog(inputs: List<IndexableAbiComponent>, hex: String, topics: List<String>): Map<String, Any> {
+fun AbiCodec.decodeLog(inputs: List<IndexableAbiComponent>, topics: List<String>, hex: String): Array<Any> {
     val (indexedInput, nonIndexedInput) = inputs.partition { it.indexed == true }
     val offset = if (indexedInput.size + 1 == topics.size) 1 else 0
-    return buildMap(inputs.size) {
-        indexedInput.forEachIndexed { index, abiInput ->
-            this[abiInput.name] = decode(abiInput, topics[index + offset])
-        }
-        this += decode(nonIndexedInput, hex)
+    val nonIndexedDecodeResult =
+        decode(nonIndexedInput.joinToString(",", prefix = "(", postfix = ")") { it.encodeType() }, hex) as List<*>
+    return Array(inputs.size) {
+        if (it < indexedInput.size) decode(indexedInput[it].encodeType(), topics[offset + it])
+        else nonIndexedDecodeResult[it - indexedInput.size] as Any
     }
 }
