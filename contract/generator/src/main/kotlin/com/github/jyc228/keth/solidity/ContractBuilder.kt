@@ -104,11 +104,12 @@ class ContractBuilder(
                             "{ ${event.toJsonStringTemplate()} }"
                         )
                 }.body {
+                    val eventRequest = "GetEventRequest<${event.name}>"
                     indexedInputs.forEachIndexed { index, input ->
-                        function("Topics.filterBy${input.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }}")
+                        function("$eventRequest.filterBy${input.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }}")
                             .parameter("vararg ${input.name}", input.typeToKotlin)
-                            .expressionBody(" = apply { filterBy${input.typeToKotlin}(${index + 1}, *${input.name}) }")
-                        context.reportType("Topics")
+                            .expressionBody(" = apply { topics!!.filterBy${input.typeToKotlin}(${index + 1}, *${input.name}) }")
+                        context.reportType("GetEventRequest")
                     }
                 }
             }
@@ -153,7 +154,6 @@ class ContractBuilder(
                                     )
                         """.trimIndent()
                         )
-                    context.reportType("Contract")
                 }
             }
 

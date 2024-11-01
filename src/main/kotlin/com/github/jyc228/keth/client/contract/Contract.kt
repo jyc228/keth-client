@@ -16,12 +16,6 @@ interface Contract<ROOT_EVENT : ContractEvent> {
         vararg requests: GetEventRequest<EVENT>,
         options: (GetLogsRequest.() -> Unit)? = null
     ): ApiResult<List<Pair<EVENT, Log>>>
-
-    class GetEventRequest<out EVENT : ContractEvent>(
-        internal val factory: ContractEventFactory<out EVENT>,
-        internal val buildTopic: Topics.() -> Unit,
-        internal var onEach: ((@UnsafeVariance EVENT, Log) -> Unit)?
-    )
 }
 
 interface ContractEvent
@@ -35,4 +29,18 @@ abstract class ContractFactory<T : Contract<*>>(val create: (Address, EthApi) ->
 
     operator fun invoke(address: Address): ContractAccessor<T> = ContractAccessor(address, this)
     operator fun invoke(address: String): ContractAccessor<T> = ContractAccessor(Address(address), this)
+}
+
+class GetEventRequest<out EVENT : ContractEvent>(
+    internal val factory: ContractEventFactory<out EVENT>,
+    internal var onEach: ((@UnsafeVariance EVENT, Log) -> Unit)?,
+    private var buildTopics: (GetEventRequest<@UnsafeVariance EVENT>.() -> Unit)?
+) {
+    var topics: Topics? = null
+
+    internal fun buildTopics(topics: Topics) {
+        this.topics = topics
+        this.topics!!.filterByEvent(factory)
+        this.buildTopics?.invoke(this)
+    }
 }

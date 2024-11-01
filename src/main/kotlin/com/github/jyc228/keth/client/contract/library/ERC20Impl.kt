@@ -13,21 +13,18 @@ class ERC20Impl(address: Address, api: EthApi) : ERC20, AbstractContract<ERC20.E
             ERC20.name.encodeFunctionCall(),
         )
     }
-
     override fun approve(_spender: Address, _value: BigInteger): ContractFunctionRequest<Boolean> {
         return newRequest(
             ERC20.approve::decodeResult,
             ERC20.approve.encodeFunctionCall(_spender, _value),
         )
     }
-
     override fun totalSupply(): ContractFunctionRequest<BigInteger> {
         return newRequest(
             ERC20.totalSupply::decodeResult,
             ERC20.totalSupply.encodeFunctionCall(),
         )
     }
-
     override fun transferFrom(
         _from: Address,
         _to: Address,
@@ -62,7 +59,6 @@ class ERC20Impl(address: Address, api: EthApi) : ERC20, AbstractContract<ERC20.E
             ERC20.transfer.encodeFunctionCall(_to, _value),
         )
     }
-
     override fun allowance(_owner: Address, _spender: Address): ContractFunctionRequest<BigInteger> {
         return newRequest(
             ERC20.allowance::decodeResult,

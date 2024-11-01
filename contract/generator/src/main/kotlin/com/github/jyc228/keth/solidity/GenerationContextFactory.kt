@@ -29,6 +29,7 @@ internal fun GenerationContext.Companion.new() = GenerationContext {
         "ContractFunctionP8" -> "com.github.jyc228.keth.client.contract.ContractFunctionP8"
         "ContractFunctionP9" -> "com.github.jyc228.keth.client.contract.ContractFunctionP9"
         "ContractFunctionRequest" -> "com.github.jyc228.keth.client.contract.ContractFunctionRequest"
+        "GetEventRequest" -> "com.github.jyc228.keth.client.contract.GetEventRequest"
 
         "ApiResult" -> "com.github.jyc228.keth.client.ApiResult"
         "EthApi" -> "com.github.jyc228.keth.client.eth.EthApi"

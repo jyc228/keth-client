@@ -10,7 +10,7 @@ import com.github.jyc228.keth.client.contract.ContractFunctionP2
 import com.github.jyc228.keth.client.contract.ContractFunctionP3
 import com.github.jyc228.keth.client.contract.ContractFunctionP4
 import com.github.jyc228.keth.client.contract.ContractFunctionRequest
-import com.github.jyc228.keth.client.eth.Topics
+import com.github.jyc228.keth.client.contract.GetEventRequest
 import com.github.jyc228.keth.type.Address
 import java.math.BigInteger
 
@@ -26,14 +26,12 @@ interface ERC721 : Contract<ERC721.Event> {
         to: Address,
         tokenId: BigInteger
     ): ContractFunctionRequest<Unit>
-
     fun safeTransferFrom(
         from: Address,
         to: Address,
         tokenId: BigInteger,
         data: ByteArray
     ): ContractFunctionRequest<Unit>
-
     fun setApprovalForAll(operator: Address, _approved: Boolean): ContractFunctionRequest<Unit>
     fun supportsInterface(interfaceId: ByteArray): ContractFunctionRequest<Boolean>
     fun symbol(): ContractFunctionRequest<String>
@@ -46,7 +44,6 @@ interface ERC721 : Contract<ERC721.Event> {
         to: Address,
         tokenId: BigInteger
     ): ContractFunctionRequest<Unit>
-
     sealed interface Event : ContractEvent
 
     data class Approval(
@@ -59,9 +56,14 @@ interface ERC721 : Contract<ERC721.Event> {
             "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
             { """{"anonymous":false,"inputs":[{"name":"owner","type":"address","internalType":"address","indexed":true},{"name":"approved","type":"address","internalType":"address","indexed":true},{"name":"tokenId","type":"uint256","internalType":"uint256","indexed":true}],"name":"Approval","type":"event"}""" }
         ) {
-            fun Topics.filterByOwner(vararg owner: Address) = apply { filterByAddress(1, *owner) }
-            fun Topics.filterByApproved(vararg approved: Address) = apply { filterByAddress(2, *approved) }
-            fun Topics.filterByTokenId(vararg tokenId: BigInteger) = apply { filterByBigInteger(3, *tokenId) }
+            fun GetEventRequest<Approval>.filterByOwner(vararg owner: Address) =
+                apply { topics!!.filterByAddress(1, *owner) }
+
+            fun GetEventRequest<Approval>.filterByApproved(vararg approved: Address) =
+                apply { topics!!.filterByAddress(2, *approved) }
+
+            fun GetEventRequest<Approval>.filterByTokenId(vararg tokenId: BigInteger) =
+                apply { topics!!.filterByBigInteger(3, *tokenId) }
         }
     }
 
@@ -75,8 +77,11 @@ interface ERC721 : Contract<ERC721.Event> {
             "0x17307eab39ab6107e8899845ad3d59bd9653f200f220920489ca2b5937696c31",
             { """{"anonymous":false,"inputs":[{"name":"owner","type":"address","internalType":"address","indexed":true},{"name":"operator","type":"address","internalType":"address","indexed":true},{"name":"approved","type":"bool","internalType":"bool","indexed":false}],"name":"ApprovalForAll","type":"event"}""" }
         ) {
-            fun Topics.filterByOwner(vararg owner: Address) = apply { filterByAddress(1, *owner) }
-            fun Topics.filterByOperator(vararg operator: Address) = apply { filterByAddress(2, *operator) }
+            fun GetEventRequest<ApprovalForAll>.filterByOwner(vararg owner: Address) =
+                apply { topics!!.filterByAddress(1, *owner) }
+
+            fun GetEventRequest<ApprovalForAll>.filterByOperator(vararg operator: Address) =
+                apply { topics!!.filterByAddress(2, *operator) }
         }
     }
 
@@ -90,9 +95,12 @@ interface ERC721 : Contract<ERC721.Event> {
             "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             { """{"anonymous":false,"inputs":[{"name":"from","type":"address","internalType":"address","indexed":true},{"name":"to","type":"address","internalType":"address","indexed":true},{"name":"tokenId","type":"uint256","internalType":"uint256","indexed":true}],"name":"Transfer","type":"event"}""" }
         ) {
-            fun Topics.filterByFrom(vararg from: Address) = apply { filterByAddress(1, *from) }
-            fun Topics.filterByTo(vararg to: Address) = apply { filterByAddress(2, *to) }
-            fun Topics.filterByTokenId(vararg tokenId: BigInteger) = apply { filterByBigInteger(3, *tokenId) }
+            fun GetEventRequest<Transfer>.filterByFrom(vararg from: Address) =
+                apply { topics!!.filterByAddress(1, *from) }
+
+            fun GetEventRequest<Transfer>.filterByTo(vararg to: Address) = apply { topics!!.filterByAddress(2, *to) }
+            fun GetEventRequest<Transfer>.filterByTokenId(vararg tokenId: BigInteger) =
+                apply { topics!!.filterByBigInteger(3, *tokenId) }
         }
     }
 
@@ -161,11 +169,9 @@ interface ERC721 : Contract<ERC721.Event> {
             ERC721::transferFrom,
             "0x23b872dd7302113369cda2901243429419bec145408fa8b352b3dd92b66c680b"
         ) { """{"inputs":[{"name":"from","type":"address","internalType":"address"},{"name":"to","type":"address","internalType":"address"},{"name":"tokenId","type":"uint256","internalType":"uint256"}],"name":"transferFrom","stateMutability":"nonpayable","type":"function"}""" }
-
         fun bin(): String {
             return ""
         }
-
         fun encodeDeploymentCallData(): String {
             return "0x" + bin()
         }

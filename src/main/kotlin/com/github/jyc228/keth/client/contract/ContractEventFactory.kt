@@ -1,7 +1,6 @@
 package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.client.eth.Log
-import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Hash
 import kotlin.reflect.KClass
@@ -34,14 +33,14 @@ abstract class ContractEventFactory<EVENT : ContractEvent>(
     }
 }
 
-inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(crossinline buildTopic: Topics.() -> Unit): Contract.GetEventRequest<E> {
-    return Contract.GetEventRequest(this, { filterByEvent(this@filter).buildTopic() }, null)
+inline fun <E : ContractEvent, reified F : ContractEventFactory<E>> F.filter(noinline buildTopic: GetEventRequest<E>.() -> Unit): GetEventRequest<E> {
+    return GetEventRequest(this, null, buildTopic)
 }
 
-fun <E : ContractEvent, F : ContractEventFactory<E>> F.onEach(callback: (E, Log) -> Unit): Contract.GetEventRequest<E> {
-    return Contract.GetEventRequest(this, { filterByEvent(this@onEach) }, callback)
+fun <E : ContractEvent, F : ContractEventFactory<E>> F.onEach(callback: (E, Log) -> Unit): GetEventRequest<E> {
+    return GetEventRequest(this, callback, null)
 }
 
-fun <E : ContractEvent> Contract.GetEventRequest<E>.onEach(callback: (E, Log) -> Unit): Contract.GetEventRequest<E> {
+fun <E : ContractEvent> GetEventRequest<E>.onEach(callback: (E, Log) -> Unit): GetEventRequest<E> {
     return apply { this.onEach = callback }
 }

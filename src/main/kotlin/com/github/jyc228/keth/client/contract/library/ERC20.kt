@@ -9,7 +9,7 @@ import com.github.jyc228.keth.client.contract.ContractFunctionP1
 import com.github.jyc228.keth.client.contract.ContractFunctionP2
 import com.github.jyc228.keth.client.contract.ContractFunctionP3
 import com.github.jyc228.keth.client.contract.ContractFunctionRequest
-import com.github.jyc228.keth.client.eth.Topics
+import com.github.jyc228.keth.client.contract.GetEventRequest
 import com.github.jyc228.keth.type.Address
 import java.math.BigInteger
 
@@ -22,7 +22,6 @@ interface ERC20 : Contract<ERC20.Event> {
         _to: Address,
         _value: BigInteger
     ): ContractFunctionRequest<Boolean>
-
     fun decimals(): ContractFunctionRequest<BigInteger>
     fun balanceOf(_owner: Address): ContractFunctionRequest<BigInteger>
     fun symbol(): ContractFunctionRequest<String>
@@ -40,8 +39,11 @@ interface ERC20 : Contract<ERC20.Event> {
             "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
             { """{"anonymous":false,"inputs":[{"name":"owner","type":"address","indexed":true},{"name":"spender","type":"address","indexed":true},{"name":"value","type":"uint256","indexed":false}],"name":"Approval","type":"event"}""" }
         ) {
-            fun Topics.filterByOwner(vararg owner: Address) = apply { filterByAddress(1, *owner) }
-            fun Topics.filterBySpender(vararg spender: Address) = apply { filterByAddress(2, *spender) }
+            fun GetEventRequest<Approval>.filterByOwner(vararg owner: Address) =
+                apply { topics!!.filterByAddress(1, *owner) }
+
+            fun GetEventRequest<Approval>.filterBySpender(vararg spender: Address) =
+                apply { topics!!.filterByAddress(2, *spender) }
         }
     }
 
@@ -55,8 +57,10 @@ interface ERC20 : Contract<ERC20.Event> {
             "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
             { """{"anonymous":false,"inputs":[{"name":"from","type":"address","indexed":true},{"name":"to","type":"address","indexed":true},{"name":"value","type":"uint256","indexed":false}],"name":"Transfer","type":"event"}""" }
         ) {
-            fun Topics.filterByFrom(vararg from: Address) = apply { filterByAddress(1, *from) }
-            fun Topics.filterByTo(vararg to: Address) = apply { filterByAddress(2, *to) }
+            fun GetEventRequest<Transfer>.filterByFrom(vararg from: Address) =
+                apply { topics!!.filterByAddress(1, *from) }
+
+            fun GetEventRequest<Transfer>.filterByTo(vararg to: Address) = apply { topics!!.filterByAddress(2, *to) }
         }
     }
 
@@ -97,11 +101,9 @@ interface ERC20 : Contract<ERC20.Event> {
             ERC20::allowance,
             "0xdd62ed3e90e97b3d417db9c0c7522647811bafca5afc6694f143588d255fdfb4"
         ) { """{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"}""" }
-
         fun bin(): String {
             return ""
         }
-
         fun encodeDeploymentCallData(): String {
             return "0x" + bin()
         }
