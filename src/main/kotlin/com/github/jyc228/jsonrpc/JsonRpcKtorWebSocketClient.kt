@@ -12,7 +12,6 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
-// https://www.jsonrpc.org/
 internal class JsonRpcKtorWebSocketClient(
     private val url: String,
     private val http: HttpClient

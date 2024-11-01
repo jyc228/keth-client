@@ -2,8 +2,8 @@ package com.github.jyc228.keth.solidity.compile
 
 import com.github.jyc228.keth.solidity.AbiComponent
 import com.github.jyc228.keth.solidity.AbiItem
-import com.github.jyc228.keth.solidity.AbiOutput
 import com.github.jyc228.keth.solidity.AbiType
+import com.github.jyc228.keth.solidity.SimpleAbiComponent
 
 class CompileResult(
     val contractName: String,
@@ -31,7 +31,7 @@ class CompileResult(
                 }
             }
             if (item.outputs.size >= 4) {
-                internalTuples += AbiOutput(
+                internalTuples += SimpleAbiComponent(
                     name = "",
                     type = "tuple",
                     internalType = "struct $contractName.${item.name?.replaceFirstChar { it.titlecase() }}Output",

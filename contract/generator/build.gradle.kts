@@ -13,3 +13,9 @@ dependencies {
 }
 
 publishing(createGPRPublisher { artifactId = "contract-generator" })
+
+tasks.register<JavaExec>("generateContractWrapperToRootProject") {
+    mainClass.set("com.github.jyc228.keth.client.contract.library.MainKt")
+    classpath = sourceSets["main"].runtimeClasspath
+    args = listOf(rootProject.sourceSets.main.get().kotlin.srcDirs.first().path)
+}

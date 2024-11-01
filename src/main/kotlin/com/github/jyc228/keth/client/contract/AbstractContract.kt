@@ -31,11 +31,11 @@ abstract class AbstractContract<ROOT_EVENT : ContractEvent>(
     }
 
     override suspend fun <EVENT : ROOT_EVENT> getLogs(
-        vararg requests: Contract.GetEventRequest<EVENT>,
+        vararg requests: GetEventRequest<EVENT>,
         options: (GetLogsRequest.() -> Unit)?
     ): ApiResult<List<Pair<EVENT, Log>>> {
         val request = GetLogsRequest(address = mutableSetOf(address)).apply {
-            requests.forEach { it.buildTopic(topics) }
+            requests.forEach { it.buildTopics(topics) }
             options?.invoke(this)
         }
         return api.getLogs(request).map { logs ->

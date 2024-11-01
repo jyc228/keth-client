@@ -14,14 +14,13 @@ import kotlin.reflect.KFunction7
 import kotlin.reflect.KFunction8
 import kotlin.reflect.KFunction9
 import kotlin.reflect.KType
-import kotlinx.serialization.json.Json
 
 abstract class AbstractContractFunction<R>(
     private val returnType: KType,
     private val sig: String,
     jsonAbi: () -> String,
 ) {
-    private val abi: AbiItem by lazy(LazyThreadSafetyMode.NONE) { Json.decodeFromString(jsonAbi()) }
+    private val abi by lazy(LazyThreadSafetyMode.NONE) { AbiItem.fromJson(jsonAbi()) }
 
     protected fun encodeFunctionCall(vararg parameters: Any?): String {
         if (parameters.isEmpty()) return sig

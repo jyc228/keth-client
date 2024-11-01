@@ -8,7 +8,7 @@ class GenerationContext(private val toFullName: (String) -> String) {
         reportedTypes += type
     }
 
-    fun fullPaths() = reportedTypes.asSequence().sorted().map(toFullName).filter { it.isNotBlank() }
+    fun fullPaths() = reportedTypes.asSequence().map(toFullName).sorted().filter { it.isNotBlank() }
 
     companion object
 }

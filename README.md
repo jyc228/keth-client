@@ -79,7 +79,8 @@ When the plugin is configured, contract wrappers are automatically generated fro
 `src/main/solidity` directory during the build (gradle task `generateKotlinContractWrapper`).
 RPC calls interacting with the contract are also affected by `interval` and `batch`.
 
-Sample code for interacting with the network using the auto-generated [ERC20.kt](src/test/kotlin/erc/ERC20.kt)
+Sample code for interacting with the network using the
+auto-generated [ERC20.kt](src/main/kotlin/com/github/jyc228/keth/client/contract/library/ERC20.kt)
 
 ```kotlin
 suspend fun main() {

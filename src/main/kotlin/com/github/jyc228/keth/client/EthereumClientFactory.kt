@@ -13,33 +13,56 @@ import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonBuilder
+import kotlinx.serialization.modules.SerializersModule
+import kotlinx.serialization.modules.polymorphic
 
+/**
+ * Factory function for creating an [EthereumClient]. The [url] parameter is the only required parameter and supports both HTTP and WebSocket protocols.
+ * Additional settings can be configured using the [initConfig] function parameter. For available configuration options, refer to [EthereumClientConfig].
+ *
+ * ```kotlin
+ * EthereumClient("https://...")
+ * EthereumClient("wss://...")
+ * EthereumClient("https://...") {
+ *      interval = 1.seconds // Send collected requests every 1 second
+ *      batchSize = 10 // Set the batch request size
+ * }
+ * ```
+ */
 fun EthereumClient(url: String, initConfig: (EthereumClientConfig.() -> Unit)? = null): EthereumClient {
     val config = EthereumClientConfig().apply { initConfig?.invoke(this) }
-    val json = Json {
-        ignoreUnknownKeys = true
-        classDiscriminator = ""
-        config.json?.invoke(this)
-    }
+    val serializerConfig = config.toSerializerConfig()
     if (config.interval.isPositive()) {
         return ScheduledBatchEthereumClient(
-            client = JsonRpcClient.from(url, config.adminJwtSecret),
+            client = JsonRpcClient(url, config.adminJwtSecret),
             interval = config.interval,
-            json = json,
-            serializerConfig = config.toSerializerConfig(),
+            json = Json { applyConfig(config, serializerConfig) },
+            serializerConfig = serializerConfig,
             batchSize = config.batchSize,
         )
     }
     return DefaultEthereumClient(
-        client = JsonRpcClient.from(url, config.adminJwtSecret),
-        json = json,
-        serializerConfig = config.toSerializerConfig(),
+        client = JsonRpcClient(url, config.adminJwtSecret),
+        json = Json { applyConfig(config, serializerConfig) },
+        serializerConfig = serializerConfig,
         batchSize = config.batchSize,
     )
 }
 
+/**
+ * For configuration details, refer to the `EthereumClient()` function documentation.
+ */
 data class EthereumClientConfig(
+    /**
+     * When set to a value greater than 0, requests will be collected and batch requests will be made at [interval] intervals.
+     * The size of each batch is determined by [batchSize].
+     */
     var interval: Duration = 0.milliseconds,
+    /**
+     * The number of requests to send in a single batch. If set to null, all requests will be sent at once.
+     *
+     * Depending on the network provider, requests may be rejected, so it's recommended to set an appropriate value.
+     */
     var batchSize: UInt? = 100u,
     var adminJwtSecret: String? = null,
     var json: (JsonBuilder.() -> Unit)? = null,
@@ -55,3 +78,12 @@ private fun EthereumClientConfig.toSerializerConfig() = SerializerConfig(
     blockWithTxHashes = blockWithTxHashesSerializer ?: RpcBlock.serializer(Block.TransactionHash.serializer()),
     blockWithTxObjects = blockWithTxObjectsSerializer ?: RpcBlock.serializer(Block.TransactionObject.serializer())
 )
+
+private fun JsonBuilder.applyConfig(ethereumConfig: EthereumClientConfig, serializerConfig: SerializerConfig) {
+    ignoreUnknownKeys = true
+    classDiscriminator = ""
+    serializersModule = SerializersModule {
+        polymorphic(Transaction::class) { defaultDeserializer { serializerConfig.transaction } }
+    }
+    ethereumConfig.json?.invoke(this)
+}

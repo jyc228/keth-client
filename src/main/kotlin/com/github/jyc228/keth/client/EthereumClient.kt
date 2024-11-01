@@ -5,11 +5,42 @@ import com.github.jyc228.keth.client.engin.EngineApi
 import com.github.jyc228.keth.client.eth.EthApi
 import com.github.jyc228.keth.client.txpool.TxpoolApi
 
+/**
+ * The main entry point for interacting with the network. This class is thread-safe and is designed to be used one instance per node.
+ *
+ * You can create an instance of this class using the `EthereumClient(url)` function. The `url` parameter is the only required parameter and supports both HTTP and WebSocket protocols.
+ * Other configurations can be set through callback parameters. For available options, see [EthereumClientConfig].
+ * For detailed examples, refer to the `EthereumClient()` documentation.
+ *
+ * Each field corresponds to an RPC method namespace prefixed to the method, e.g., `eth_blockNumber -> eth.blockNumber()`.
+ *
+ * The [contract] field is an exception and exists to interact with the implementations of the automatically generated [com.github.jyc228.keth.client.contract.Contract].
+ * For more details, refer to [ContractApi].
+ *
+ * All RPC call results are wrapped in [ApiResult]. If an error occurs during the RPC call, an exception is not thrown; instead, an [ApiResult] is returned with a failure status.
+ * However, if an error occurs before or after the RPC call during preprocessing or postprocessing, an exception is thrown.
+ *
+ * Generally, each method corresponds to one RPC call. However, you can batch requests into a single call using the [batch] function. For more details, refer to the [batch] function documentation.
+ */
 interface EthereumClient {
     val eth: EthApi
     val engin: EngineApi
     val txpool: TxpoolApi
     val contract: ContractApi
+
+    /**
+     * Performs a batch request. Batch requests can be segmented based on the [EthereumClientConfig.batchSize] value.
+     * If you need to use different RPCs in a batch request, you can use the [batch2], [batch3] functions.
+     *
+     * You must use the [EthereumClient] instance bound to `this`.
+     * ```kotlin
+     * val client = EthereumClient("https://... or wss://...")
+     * client.eth.getHeaders(1uL..10uL) // 10 RPC calls
+     * client.batch { eth.getHeaders(1uL..10uL) } // 1 RPC call
+     * client.batch2({ eth.blockNumber() }, { eth.gasPrice() })
+     * // Do not use it like this: client.batch { client.eth.getHeaders(1uL..10uL) }
+     * ```
+     */
     suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>): List<ApiResult<R>>
 
     companion object

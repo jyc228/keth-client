@@ -1,10 +1,15 @@
 package com.github.jyc228.keth.solidity
 
+import java.io.InputStream
 import java.math.BigInteger
 import kotlinx.serialization.Contextual
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
 import org.bouncycastle.jcajce.provider.digest.Keccak
 import org.bouncycastle.util.encoders.Hex
+import org.intellij.lang.annotations.Language
 
 interface AbiComponent {
     val name: String
@@ -36,19 +41,19 @@ interface AbiComponent {
 }
 
 @Serializable
-data class AbiInput(
+data class IndexableAbiComponent(
     override val name: String,
     override val type: String,
-    override val components: List<AbiInput> = emptyList(),
+    override val components: List<SimpleAbiComponent> = emptyList(),
     override val internalType: String? = null,
     val indexed: Boolean? = null,
 ) : AbiComponent
 
 @Serializable
-data class AbiOutput(
+data class SimpleAbiComponent(
     override val name: String,
     override val type: String,
-    override val components: List<AbiOutput> = emptyList(),
+    override val components: List<SimpleAbiComponent> = emptyList(),
     override val internalType: String? = null,
 ) : AbiComponent
 
@@ -56,9 +61,9 @@ data class AbiOutput(
 data class AbiItem(
     val anonymous: Boolean? = null,
     val constant: Boolean? = null,
-    val inputs: List<AbiInput> = emptyList(),
+    val inputs: List<IndexableAbiComponent> = emptyList(),
     val name: String? = null,
-    val outputs: List<AbiOutput> = emptyList(),
+    val outputs: List<SimpleAbiComponent> = emptyList(),
     val payable: Boolean? = null,
     val stateMutability: StateMutabilityType? = null,
     val type: AbiType? = null,
@@ -66,7 +71,15 @@ data class AbiItem(
     val gas: BigInteger? = null,
 ) {
     fun ioAsSequence(): Sequence<AbiComponent> = inputs.asSequence() + outputs.asSequence()
-    fun computeSig(): String = "${name}(${inputs.joinToString(",") { it.type }})".keccak256Hash()
+    fun computeSig(): String = "${name}(${inputs.joinToString(",") { it.encodeType() }})".keccak256Hash()
+
+    companion object {
+        fun fromJson(@Language("json") json: String): AbiItem = Json.decodeFromString(json)
+        fun listFromJson(@Language("json") json: String): List<AbiItem> = Json.decodeFromString(json)
+
+        @OptIn(ExperimentalSerializationApi::class)
+        fun listFromJsonStream(stream: InputStream): List<AbiItem> = Json.decodeFromStream(stream)
+    }
 }
 
 enum class StateMutabilityType {

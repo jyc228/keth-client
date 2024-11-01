@@ -7,7 +7,6 @@ import com.github.jyc228.keth.client.eth.Log
 import com.github.jyc228.keth.client.eth.Topics
 import com.github.jyc228.keth.solidity.AbiItem
 import com.github.jyc228.keth.type.Address
-import kotlinx.serialization.json.Json
 import org.intellij.lang.annotations.Language
 
 interface Contract<ROOT_EVENT : ContractEvent> {
@@ -17,24 +16,31 @@ interface Contract<ROOT_EVENT : ContractEvent> {
         vararg requests: GetEventRequest<EVENT>,
         options: (GetLogsRequest.() -> Unit)? = null
     ): ApiResult<List<Pair<EVENT, Log>>>
-
-    abstract class Factory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
-        protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
-            val abi: AbiItem = Json.decodeFromString(jsonAbi)
-            return abiCodec.encode(abi.inputs, args.toList())
-        }
-
-        operator fun invoke(address: Address): Instance<T> = Instance(address, this)
-        operator fun invoke(address: String): Instance<T> = Instance(Address(address), this)
-    }
-
-    class Instance<T : Contract<*>>(val address: Address, internal val factory: Factory<T>)
-
-    class GetEventRequest<out EVENT : ContractEvent>(
-        internal val factory: ContractEventFactory<out EVENT>,
-        internal val buildTopic: Topics.() -> Unit,
-        internal var onEach: ((@UnsafeVariance EVENT, Log) -> Unit)?
-    )
 }
 
 interface ContractEvent
+
+class ContractAccessor<T : Contract<*>>(val address: Address, internal val factory: ContractFactory<T>)
+
+abstract class ContractFactory<T : Contract<*>>(val create: (Address, EthApi) -> T) {
+    protected fun encodeParameters(@Language("json") jsonAbi: String, vararg args: Any?): String {
+        return abiCodec.encode(AbiItem.fromJson(jsonAbi).inputs, args.toList())
+    }
+
+    operator fun invoke(address: Address): ContractAccessor<T> = ContractAccessor(address, this)
+    operator fun invoke(address: String): ContractAccessor<T> = ContractAccessor(Address(address), this)
+}
+
+class GetEventRequest<out EVENT : ContractEvent>(
+    internal val factory: ContractEventFactory<out EVENT>,
+    internal var onEach: ((@UnsafeVariance EVENT, Log) -> Unit)?,
+    private var buildTopics: (GetEventRequest<@UnsafeVariance EVENT>.() -> Unit)?
+) {
+    var topics: Topics? = null
+
+    internal fun buildTopics(topics: Topics) {
+        this.topics = topics
+        this.topics!!.filterByEvent(factory)
+        this.buildTopics?.invoke(this)
+    }
+}

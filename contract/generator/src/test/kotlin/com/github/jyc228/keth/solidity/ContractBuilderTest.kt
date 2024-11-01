@@ -7,7 +7,6 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 
 class ContractBuilderTest : StringSpec({
     val outputDir = tempdir()
@@ -24,7 +23,7 @@ class ContractBuilderTest : StringSpec({
     fun readFileContent(file: String): String = File(outputDir.absolutePath + file).readText()
 
     fun newContractBuilder(contractName: String): ContractBuilder {
-        val abi = Json.decodeFromString<List<AbiItem>>(readFileContent("/$contractName.abi"))
+        val abi = AbiItem.listFromJson(readFileContent("/$contractName.abi"))
         val bin = readFileContent("/$contractName.bin")
         return ContractBuilder("com.github.jyc228", CompileResult(contractName, abi, bin))
     }

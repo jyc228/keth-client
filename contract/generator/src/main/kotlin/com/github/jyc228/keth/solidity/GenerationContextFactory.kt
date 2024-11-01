@@ -15,6 +15,7 @@ internal fun GenerationContext.Companion.new() = GenerationContext {
         "Topics" -> "com.github.jyc228.keth.client.eth.Topics"
         "AbstractContract" -> "com.github.jyc228.keth.client.contract.AbstractContract"
         "Contract" -> "com.github.jyc228.keth.client.contract.Contract"
+        "ContractFactory" -> "com.github.jyc228.keth.client.contract.ContractFactory"
         "ContractEvent" -> "com.github.jyc228.keth.client.contract.ContractEvent"
         "ContractEventFactory" -> "com.github.jyc228.keth.client.contract.ContractEventFactory"
         "ContractFunctionP0" -> "com.github.jyc228.keth.client.contract.ContractFunctionP0"
@@ -28,6 +29,7 @@ internal fun GenerationContext.Companion.new() = GenerationContext {
         "ContractFunctionP8" -> "com.github.jyc228.keth.client.contract.ContractFunctionP8"
         "ContractFunctionP9" -> "com.github.jyc228.keth.client.contract.ContractFunctionP9"
         "ContractFunctionRequest" -> "com.github.jyc228.keth.client.contract.ContractFunctionRequest"
+        "GetEventRequest" -> "com.github.jyc228.keth.client.contract.GetEventRequest"
 
         "ApiResult" -> "com.github.jyc228.keth.client.ApiResult"
         "EthApi" -> "com.github.jyc228.keth.client.eth.EthApi"
