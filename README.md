@@ -45,7 +45,7 @@ The batch mode, which sends multiple requests at once, is provided by the `Ether
 callback function, `this` is bound to `EthereumClient`.
 You need to use the client bound to `this` when using the API.
 For single types, the `batch` function is sufficient, but if you want to request functions with different return types
-simultaneously, you can use the `batch2`, `batch3` extension functions.
+simultaneously, you can use the `batch` extension functions.
 The `batchSize` property also applies here.
 
 ```kotlin
@@ -58,7 +58,7 @@ suspend fun main() {
     // 1 HTTP request will be sent. If batchSize is set to 5, the requests will be split into 2 HTTP requests.
     client.batch { eth.getBlocks(1uL..10uL, txHash) }.awaitAllOrThrow()
 
-    client.batch3( // 1 HTTP request will be sent.
+  client.batch( // 1 HTTP request will be sent.
         { eth.chainId() },
         { eth.getBlock(txHash) },
         { eth.getTransactionByBlock(BlockReference.latest, 0) }
@@ -94,7 +94,7 @@ suspend fun main() {
         tokenHolders.map { contract[usdt].balanceOf(it).call { } }
     }.awaitAllOrThrow()
 
-    client.batch2(
+    client.batch(
         { client.contract[usdt].name().call { } },
         { client.contract[usdt].decimals().call { } },
     ) { name, decimals ->

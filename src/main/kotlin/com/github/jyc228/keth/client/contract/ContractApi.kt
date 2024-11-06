@@ -18,7 +18,7 @@ package com.github.jyc228.keth.client.contract
  *
  * client.contract[usdt].name().call {}.awaitOrThrow()
  *
- * client.batch2(
+ * client.batch(
  *      { contract[usdt].name().call {} },
  *      { contract[usdt].symbol().call {} }
  * )

@@ -30,14 +30,14 @@ interface EthereumClient {
 
     /**
      * Performs a batch request. Batch requests can be segmented based on the [EthereumClientConfig.batchSize] value.
-     * If you need to use different RPCs in a batch request, you can use the [batch2], [batch3] functions.
+     * If you need to use different RPCs in a batch request, you can use the [com.github.jyc228.keth.client.batch] extension functions.
      *
      * You must use the [EthereumClient] instance bound to `this`.
      * ```kotlin
      * val client = EthereumClient("https://... or wss://...")
      * client.eth.getHeaders(1uL..10uL) // 10 RPC calls
      * client.batch { eth.getHeaders(1uL..10uL) } // 1 RPC call
-     * client.batch2({ eth.blockNumber() }, { eth.gasPrice() })
+     * client.batch({ eth.blockNumber() }, { eth.gasPrice() })
      * // Do not use it like this: client.batch { client.eth.getHeaders(1uL..10uL) }
      * ```
      */
@@ -46,34 +46,35 @@ interface EthereumClient {
     companion object
 }
 
-suspend fun <R1, R2> EthereumClient.batch2(
+suspend fun <R1, R2> EthereumClient.batch(
     e1: BatchElement<R1>,
     e2: BatchElement<R2>,
-): Pair<ApiResult<R1>, ApiResult<R2>> = batch2(e1, e2) { r1, r2 -> r1 to r2 }
+): Pair<ApiResult<R1>, ApiResult<R2>> = batch(e1, e2) { r1, r2 -> r1 to r2 }
 
-@Suppress("UNCHECKED_CAST")
-suspend fun <R1, R2, RESULT> EthereumClient.batch2(
+suspend fun <R1, R2, RESULT> EthereumClient.batch(
     e1: BatchElement<R1>,
     e2: BatchElement<R2>,
     transform: suspend (ApiResult<R1>, ApiResult<R2>) -> RESULT
-): RESULT = batch(e1, e2).let { transform(it[0] as ApiResult<R1>, it[1] as ApiResult<R2>) }
+): RESULT = execute(e1, e2).let { transform(it[0].cast(), it[1].cast()) }
 
-suspend fun <R1, R2, R3> EthereumClient.batch3(
+suspend fun <R1, R2, R3> EthereumClient.batch(
     e1: BatchElement<R1>,
     e2: BatchElement<R2>,
     e3: BatchElement<R3>
-): Triple<ApiResult<R1>, ApiResult<R2>, ApiResult<R3>> = batch3(e1, e2, e3) { v1, v2, v3 -> Triple(v1, v2, v3) }
+): Triple<ApiResult<R1>, ApiResult<R2>, ApiResult<R3>> = batch(e1, e2, e3) { v1, v2, v3 -> Triple(v1, v2, v3) }
 
-@Suppress("UNCHECKED_CAST")
-suspend fun <R1, R2, R3, RESULT> EthereumClient.batch3(
+suspend fun <R1, R2, R3, RESULT> EthereumClient.batch(
     e1: BatchElement<R1>,
     e2: BatchElement<R2>,
     e3: BatchElement<R3>,
     transform: suspend (ApiResult<R1>, ApiResult<R2>, ApiResult<R3>) -> RESULT
-): RESULT = batch(e1, e2, e3).let { transform(it[0] as ApiResult<R1>, it[1] as ApiResult<R2>, it[2] as ApiResult<R3>) }
+): RESULT = execute(e1, e2, e3).let { transform(it[0].cast(), it[1].cast(), it[2].cast()) }
 
-private suspend fun EthereumClient.batch(vararg e: BatchElement<Any?>): List<ApiResult<Any?>> {
+private suspend fun EthereumClient.execute(vararg e: BatchElement<Any?>): List<ApiResult<Any?>> {
     return batch { e.map { it(this) } }
 }
 
 private typealias BatchElement<T> = suspend EthereumClient.() -> ApiResult<T>
+
+@Suppress("UNCHECKED_CAST")
+private fun <E> ApiResult<Any?>.cast(): ApiResult<E> = this as ApiResult<E>
