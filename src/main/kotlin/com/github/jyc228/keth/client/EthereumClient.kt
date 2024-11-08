@@ -3,7 +3,9 @@ package com.github.jyc228.keth.client
 import com.github.jyc228.keth.client.contract.ContractApi
 import com.github.jyc228.keth.client.engin.EngineApi
 import com.github.jyc228.keth.client.eth.EthApi
+import com.github.jyc228.keth.client.net.NetApi
 import com.github.jyc228.keth.client.txpool.TxpoolApi
+import com.github.jyc228.keth.client.web3.Web3Api
 
 /**
  * The main entry point for interacting with the network. This class is thread-safe and is designed to be used one instance per node.
@@ -23,6 +25,8 @@ import com.github.jyc228.keth.client.txpool.TxpoolApi
  * Generally, each method corresponds to one RPC call. However, you can batch requests into a single call using the [batch] function. For more details, refer to the [batch] function documentation.
  */
 interface EthereumClient {
+    val web3: Web3Api
+    val net: NetApi
     val eth: EthApi
     val engin: EngineApi
     val txpool: TxpoolApi

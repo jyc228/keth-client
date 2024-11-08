@@ -8,8 +8,8 @@ import kotlinx.serialization.json.encodeToJsonElement
 import kotlinx.serialization.serializer
 
 abstract class AbstractJsonRpcApi(val client: JsonRpcClientWrapper) {
-    protected suspend inline operator fun <reified T> String.invoke(): ApiResult<T> {
-        return client.send(this, JsonNull, serializer())
+    protected suspend inline operator fun <reified T> String.invoke(serializer: KSerializer<out T> = serializer()): ApiResult<T> {
+        return client.send(this, JsonNull, serializer)
     }
 
     protected suspend inline operator fun <reified T, reified P1> String.invoke(
