@@ -8,6 +8,23 @@ import com.github.jyc228.keth.client.txpool.TxpoolApi
 import com.github.jyc228.keth.client.web3.Web3Api
 
 /**
+ * Interface representing a comprehensive Ethereum API.
+ * Provides access to various Ethereum-related functionalities via sub-APIs.
+ *
+ * [official document](https://ethereum.org/en/developers/docs/apis/json-rpc)
+ */
+interface EthereumApi {
+    val web3: Web3Api
+    val net: NetApi
+    val eth: EthApi
+    val engin: EngineApi
+    val txpool: TxpoolApi
+    val contract: ContractApi
+
+    companion object
+}
+
+/**
  * The main entry point for interacting with the network. This class is thread-safe and is designed to be used one instance per node.
  *
  * You can create an instance of this class using the `EthereumClient(url)` function. The `url` parameter is the only required parameter and supports both HTTP and WebSocket protocols.
@@ -24,14 +41,7 @@ import com.github.jyc228.keth.client.web3.Web3Api
  *
  * Generally, each method corresponds to one RPC call. However, you can batch requests into a single call using the [batch] function. For more details, refer to the [batch] function documentation.
  */
-interface EthereumClient {
-    val web3: Web3Api
-    val net: NetApi
-    val eth: EthApi
-    val engin: EngineApi
-    val txpool: TxpoolApi
-    val contract: ContractApi
-
+interface EthereumClient : EthereumApi {
     /**
      * Performs a batch request. Batch requests can be segmented based on the [EthereumClientConfig.batchSize] value.
      * If you need to use different RPCs in a batch request, you can use the [com.github.jyc228.keth.client.batch] extension functions.
@@ -45,7 +55,7 @@ interface EthereumClient {
      * // Do not use it like this: client.batch { client.eth.getHeaders(1uL..10uL) }
      * ```
      */
-    suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>): List<ApiResult<R>>
+    suspend fun <R> batch(init: suspend EthereumApi.() -> List<ApiResult<R>>): List<ApiResult<R>>
 
     companion object
 }
@@ -78,7 +88,7 @@ private suspend fun EthereumClient.execute(vararg e: BatchElement<Any?>): List<A
     return batch { e.map { it(this) } }
 }
 
-private typealias BatchElement<T> = suspend EthereumClient.() -> ApiResult<T>
+private typealias BatchElement<T> = suspend EthereumApi.() -> ApiResult<T>
 
 @Suppress("UNCHECKED_CAST")
 private fun <E> ApiResult<Any?>.cast(): ApiResult<E> = this as ApiResult<E>

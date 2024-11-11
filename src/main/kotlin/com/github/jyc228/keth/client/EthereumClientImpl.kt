@@ -34,7 +34,7 @@ class DefaultEthereumClient(
     private val serializerConfig: SerializerConfig,
     private val batchSize: UInt?,
 ) : AbstractEthereumClient(ImmediateJsonRpcClient(client, json), serializerConfig) {
-    override suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>): List<ApiResult<R>> {
+    override suspend fun <R> batch(init: suspend EthereumApi.() -> List<ApiResult<R>>): List<ApiResult<R>> {
         return BatchEthereumClient(client, json, serializerConfig, batchSize).batch(init)
     }
 }
@@ -46,7 +46,7 @@ class BatchEthereumClient(
     batchSize: UInt?,
     private val wrapper: BatchJsonRpcClient = BatchJsonRpcClient(client, json, batchSize)
 ) : AbstractEthereumClient(wrapper, serializerConfig) {
-    override suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>) = wrapper.execute(init(this))
+    override suspend fun <R> batch(init: suspend EthereumApi.() -> List<ApiResult<R>>) = wrapper.execute(init(this))
 }
 
 class ScheduledBatchEthereumClient(
@@ -56,5 +56,5 @@ class ScheduledBatchEthereumClient(
     serializerConfig: SerializerConfig,
     batchSize: UInt?,
 ) : AbstractEthereumClient(ScheduledJsonRpcClient(client, json, interval, batchSize), serializerConfig) {
-    override suspend fun <R> batch(init: suspend EthereumClient.() -> List<ApiResult<R>>) = init(this)
+    override suspend fun <R> batch(init: suspend EthereumApi.() -> List<ApiResult<R>>) = init(this)
 }
