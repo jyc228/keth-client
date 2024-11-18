@@ -2,6 +2,7 @@ package com.github.jyc228.keth.client.contract
 
 import com.github.jyc228.keth.solidity.AbiCodec
 import com.github.jyc228.keth.solidity.AbiItem
+import com.github.jyc228.keth.type.Address
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.collections.shouldHaveSize
 import io.kotest.matchers.shouldBe
@@ -56,4 +57,40 @@ class AbiCodecExtensionTest : DescribeSpec({
             result[2].shouldBeInstanceOf<BigInteger>() shouldBe 60220000.toBigInteger()
         }
     }
+
+    context("decodeParameter") {
+        it("exactInputSingle") {
+            val result = abiCodec.decodeFunctionCall(
+                SmartRouter.exactInputSingle.abi.inputs,
+                SmartRouter::exactInputSingle.parameters,
+                "0x04e45aaf000000000000000000000000152649ea73beab28c5b49b26eb48f7ead6d4c898000000000000000000000000c02aaa39b223fe8d0a0e5c4f27ead9083c756cc200000000000000000000000000000000000000000000000000000000000009c4000000000000000000000000ec67e10a5991ab7ae9ea3d47a1f3725009abb92c00000000000000000000000000000000000000000000006c6b935b8bbd40000000000000000000000000000000000000000000000000000014f82c2d4eb4f7000000000000000000000000000000000000000000000000000000000000000000"
+            )
+
+            result shouldHaveSize 1
+            result[0].shouldBeInstanceOf<IV3SwapRouter.ExactInputSingleParams>()
+        }
+    }
 })
+
+private interface SmartRouter {
+    fun exactInputSingle(params: IV3SwapRouter.ExactInputSingleParams): ContractFunctionRequest<BigInteger>
+
+    companion object {
+        val exactInputSingle = ContractFunctionP1(
+            SmartRouter::exactInputSingle,
+            "0x5d76b977a20678c085d64cafedd47d4dcdcb7a9384bad25755ca7b988efaf6f6"
+        ) { """{"inputs":[{"name":"params","type":"tuple","components":[{"name":"tokenIn","type":"address","internalType":"address"},{"name":"tokenOut","type":"address","internalType":"address"},{"name":"fee","type":"uint24","internalType":"uint24"},{"name":"recipient","type":"address","internalType":"address"},{"name":"amountIn","type":"uint256","internalType":"uint256"},{"name":"amountOutMinimum","type":"uint256","internalType":"uint256"},{"name":"sqrtPriceLimitX96","type":"uint160","internalType":"uint160"}],"internalType":"struct IV3SwapRouter.ExactInputSingleParams"}],"name":"exactInputSingle","outputs":[{"name":"amountOut","type":"uint256","internalType":"uint256"}],"stateMutability":"payable","type":"function"}""" }
+    }
+}
+
+private object IV3SwapRouter {
+    data class ExactInputSingleParams(
+        val tokenIn: Address,
+        val tokenOut: Address,
+        val fee: BigInteger,
+        val recipient: Address,
+        val amountIn: BigInteger,
+        val amountOutMinimum: BigInteger,
+        val sqrtPriceLimitX96: BigInteger
+    )
+}

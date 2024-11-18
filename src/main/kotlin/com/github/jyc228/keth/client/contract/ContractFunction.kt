@@ -20,16 +20,11 @@ abstract class AbstractContractFunction<R>(
     private val sig: String,
     jsonAbi: () -> String,
 ) {
-    private val abi by lazy(LazyThreadSafetyMode.NONE) { AbiItem.fromJson(jsonAbi()) }
+    val abi by lazy(LazyThreadSafetyMode.NONE) { AbiItem.fromJson(jsonAbi()) }
 
     protected fun encodeFunctionCall(vararg parameters: Any?): String {
         if (parameters.isEmpty()) return sig
         return "${sig.take(10)}${abiCodec.encode(abi.inputs, parameters.map { (it as? HexString)?.hex ?: it })}"
-    }
-
-    protected fun decodeFunctionParameter(input: String): List<Any> {
-        val result = abiCodec.decode(abi.inputs, input.drop(10))
-        return abi.inputs.map { result.getValue(it.name) }
     }
 
     @Suppress("UNCHECKED_CAST")
@@ -38,6 +33,9 @@ abstract class AbstractContractFunction<R>(
         val result = abiCodec.decode(abi.outputs, result.hex.removePrefix("0x"))
         return result.getValue(abi.outputs[0].name) as R
     }
+
+    @Suppress("UNCHECKED_CAST", "NOTHING_TO_INLINE")
+    protected inline fun <E> Any.c(): E = this as E
 }
 
 class ContractFunctionP0<R>(
@@ -55,10 +53,9 @@ class ContractFunctionP1<P1, R>(
 ) : AbstractContractFunction<R>(kFunction.returnType, sig, jsonAbi) {
     fun encodeFunctionCall(p1: P1) = super.encodeFunctionCall(p1)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(params[0] as P1)
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c())
     }
 }
 
@@ -69,10 +66,9 @@ class ContractFunctionP2<P1, P2, R>(
 ) : AbstractContractFunction<R>(kFunction.returnType, sig, jsonAbi) {
     fun encodeFunctionCall(p1: P1, p2: P2) = super.encodeFunctionCall(p1, p2)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(params[0] as P1, params[1] as P2)
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c())
     }
 }
 
@@ -83,10 +79,9 @@ class ContractFunctionP3<P1, P2, P3, R>(
 ) : AbstractContractFunction<R>(kFunction.returnType, sig, jsonAbi) {
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3) = super.encodeFunctionCall(p1, p2, p3)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(params[0] as P1, params[1] as P2, params[2] as P3)
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c())
     }
 }
 
@@ -97,10 +92,9 @@ class ContractFunctionP4<P1, P2, P3, P4, R>(
 ) : AbstractContractFunction<R>(kFunction.returnType, sig, jsonAbi) {
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3, p4: P4) = super.encodeFunctionCall(p1, p2, p3, p4)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3, P4) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(params[0] as P1, params[1] as P2, params[2] as P3, params[3] as P4)
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c(), p[3].c())
     }
 }
 
@@ -111,10 +105,9 @@ class ContractFunctionP5<P1, P2, P3, P4, P5, R>(
 ) : AbstractContractFunction<R>(kFunction.returnType, sig, jsonAbi) {
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5) = super.encodeFunctionCall(p1, p2, p3, p4, p5)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3, P4, P5) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(params[0] as P1, params[1] as P2, params[2] as P3, params[3] as P4, params[4] as P5)
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c(), p[3].c(), p[4].c())
     }
 }
 
@@ -126,17 +119,9 @@ class ContractFunctionP6<P1, P2, P3, P4, P5, P6, R>(
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6) =
         super.encodeFunctionCall(p1, p2, p3, p4, p5, p6)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3, P4, P5, P6) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(
-            params[0] as P1,
-            params[1] as P2,
-            params[2] as P3,
-            params[3] as P4,
-            params[4] as P5,
-            params[5] as P6
-        )
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c(), p[3].c(), p[4].c(), p[5].c())
     }
 }
 
@@ -148,18 +133,9 @@ class ContractFunctionP7<P1, P2, P3, P4, P5, P6, P7, R>(
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7) =
         super.encodeFunctionCall(p1, p2, p3, p4, p5, p6, p7)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3, P4, P5, P6, P7) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(
-            params[0] as P1,
-            params[1] as P2,
-            params[2] as P3,
-            params[3] as P4,
-            params[4] as P5,
-            params[5] as P6,
-            params[6] as P7,
-        )
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c(), p[3].c(), p[4].c(), p[5].c(), p[6].c())
     }
 }
 
@@ -171,19 +147,9 @@ class ContractFunctionP8<P1, P2, P3, P4, P5, P6, P7, P8, R>(
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8) =
         super.encodeFunctionCall(p1, p2, p3, p4, p5, p6, p7, p8)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3, P4, P5, P6, P7, P8) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(
-            params[0] as P1,
-            params[1] as P2,
-            params[2] as P3,
-            params[3] as P4,
-            params[4] as P5,
-            params[5] as P6,
-            params[6] as P7,
-            params[7] as P8,
-        )
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c(), p[3].c(), p[4].c(), p[5].c(), p[6].c(), p[7].c())
     }
 }
 
@@ -195,19 +161,8 @@ class ContractFunctionP9<P1, P2, P3, P4, P5, P6, P7, P8, P9, R>(
     fun encodeFunctionCall(p1: P1, p2: P2, p3: P3, p4: P4, p5: P5, p6: P6, p7: P7, p8: P8, p9: P9) =
         super.encodeFunctionCall(p1, p2, p3, p4, p5, p6, p7, p8, p9)
 
-    @Suppress("UNCHECKED_CAST")
     fun <R> decodeFunctionCall(input: String, callParameter: (P1, P2, P3, P4, P5, P6, P7, P8, P9) -> R): R {
-        val params = decodeFunctionParameter(input)
-        return callParameter(
-            params[0] as P1,
-            params[1] as P2,
-            params[2] as P3,
-            params[3] as P4,
-            params[4] as P5,
-            params[5] as P6,
-            params[6] as P7,
-            params[7] as P8,
-            params[8] as P9,
-        )
+        val p = abiCodec.decodeFunctionCall(abi.inputs, kFunction.parameters, input)
+        return callParameter(p[0].c(), p[1].c(), p[2].c(), p[3].c(), p[4].c(), p[5].c(), p[6].c(), p[7].c(), p[8].c())
     }
 }
