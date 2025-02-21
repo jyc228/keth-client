@@ -17,7 +17,7 @@ import kotlin.reflect.KType
 
 abstract class AbstractContractFunction<R>(
     private val returnType: KType,
-    private val sig: String,
+    val sig: String,
     jsonAbi: () -> String,
 ) {
     val abi by lazy(LazyThreadSafetyMode.NONE) { AbiItem.fromJson(jsonAbi()) }
