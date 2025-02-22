@@ -156,17 +156,30 @@ data object BytesCodec : PrimitiveCodec<ByteArray>() {
     private val emptyByteArray = byteArrayOf()
     override fun computeEncodeSize(type: Type, data: Any): Int {
         if (type.dynamic) {
-            return 32 + (32 * ceil((data as String).hexBytesLength / 32.0).toInt())
+            val size = when (data) {
+                is String -> data.hexBytesLength
+                is ByteArray -> data.size
+                else -> error("unsupported type ${data::class.simpleName}")
+            }
+            return 32 + (32 * ceil(size / 32.0).toInt())
         }
         return 32
     }
 
     override fun encode(type: Type, data: Any, buffer: ByteBuffer) {
-        require(data is String) { "unsupported type $data" }
-        if (type.dynamic) {
-            NumberCodec.encode(data.hexBytesLength, buffer)
+        when (data) {
+            is String -> {
+                if (type.dynamic) NumberCodec.encode(data.hexBytesLength, buffer)
+                buffer.putHexString(data)
+            }
+
+            is ByteArray -> {
+                if (type.dynamic) NumberCodec.encode(data.size, buffer)
+                buffer.putBytes(data)
+            }
+
+            else -> error("unsupported type ${data::class.simpleName}")
         }
-        buffer.putHexString(data)
     }
 
     private val String.hexBytesLength: Int
@@ -192,10 +205,20 @@ data object AddressCodec : PrimitiveCodec<String>() {
 
     override fun encode(type: Type, data: Any, buffer: ByteBuffer) = encode(data, buffer)
 
-    private fun encode(data: Any?, buffer: ByteBuffer) {
-        data as String
-        require(data.length == 40 || data.length == 42) { "invalid address length: ${data.length}" }
-        buffer.position(buffer.position() + 12).putHexString(data)
+    private fun encode(data: Any, buffer: ByteBuffer) {
+        when (data) {
+            is String -> {
+                require(data.length == 40 || data.length == 42) { "invalid address length: ${data.length}" }
+                buffer.position(buffer.position() + 12).putHexString(data)
+            }
+
+            is ByteArray -> {
+                require(data.size == 20) { "invalid address length: ${data.size}" }
+                buffer.position(buffer.position() + 12).putBytes(data)
+            }
+
+            else -> error("unsupported data type ${data::class.simpleName}")
+        }
     }
 
     override fun decodeTyped(type: Type, context: Codec.DecodingContext): String {
@@ -311,6 +334,13 @@ private fun ByteBuffer.putHexString(hex: String) {
         hex += '0'
     }
     put(hex.removePrefix("0x").hexToByteArray())
+    if (position() % 32 != 0) {
+        position(position() + 32 - (position() % 32))
+    }
+}
+
+private fun ByteBuffer.putBytes(byteArray: ByteArray) {
+    put(byteArray)
     if (position() % 32 != 0) {
         position(position() + 32 - (position() % 32))
     }
