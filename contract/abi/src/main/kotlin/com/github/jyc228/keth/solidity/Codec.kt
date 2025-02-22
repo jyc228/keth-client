@@ -5,8 +5,8 @@ import java.nio.ByteBuffer
 import kotlin.math.ceil
 
 sealed interface Codec {
-    fun computeEncodeSize(type: Type, data: Any?): Int
-    fun encode(type: Type, data: Any?, buffer: ByteBuffer)
+    fun computeEncodeSize(type: Type, data: Any): Int
+    fun encode(type: Type, data: Any, buffer: ByteBuffer)
     fun decode(type: Type, context: DecodingContext): Any
 
     @OptIn(ExperimentalStdlibApi::class)
@@ -28,8 +28,8 @@ sealed interface Codec {
     }
 
     companion object : Codec {
-        override fun computeEncodeSize(type: Type, data: Any?): Int = selectCodec(type).computeEncodeSize(type, data)
-        override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = selectCodec(type).encode(type, data, buffer)
+        override fun computeEncodeSize(type: Type, data: Any): Int = selectCodec(type).computeEncodeSize(type, data)
+        override fun encode(type: Type, data: Any, buffer: ByteBuffer) = selectCodec(type).encode(type, data, buffer)
         override fun decode(type: Type, context: DecodingContext): Any = selectCodec(type).decode(type, context)
 
         private fun selectCodec(type: Type): Codec = when (type) {
@@ -58,9 +58,9 @@ abstract class PrimitiveCodec<T : Any> : Codec {
 }
 
 data object BooleanCodec : PrimitiveCodec<Boolean>() {
-    override fun computeEncodeSize(type: Type, data: Any?): Int = 32
+    override fun computeEncodeSize(type: Type, data: Any): Int = 32
 
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = encode(data, buffer)
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) = encode(data, buffer)
 
     private fun encode(data: Any?, buffer: ByteBuffer) {
         repeat(31) { require(buffer.get() == 0.toByte()) }
@@ -110,9 +110,9 @@ data object NumberCodec : PrimitiveCodec<BigInteger>() {
 
     private val mask = BigInteger.TWO.pow(256)
 
-    override fun computeEncodeSize(type: Type, data: Any?): Int = 32
+    override fun computeEncodeSize(type: Type, data: Any): Int = 32
 
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = encode(data, buffer)
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) = encode(data, buffer)
 
     fun encode(data: Any?, buffer: ByteBuffer) {
         val value = when (data is String) {
@@ -139,11 +139,11 @@ data object NumberCodec : PrimitiveCodec<BigInteger>() {
 
 data object StringCodec : PrimitiveCodec<String>() {
     @OptIn(ExperimentalStdlibApi::class)
-    override fun computeEncodeSize(type: Type, data: Any?): Int =
+    override fun computeEncodeSize(type: Type, data: Any): Int =
         BytesCodec.computeEncodeSize(type, data.toString().toByteArray(Charsets.UTF_8).toHexString())
 
     @OptIn(ExperimentalStdlibApi::class)
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) {
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) {
         BytesCodec.encode(type, data.toString().toByteArray(Charsets.UTF_8).toHexString(), buffer)
     }
 
@@ -154,14 +154,14 @@ data object StringCodec : PrimitiveCodec<String>() {
 
 data object BytesCodec : PrimitiveCodec<ByteArray>() {
     private val emptyByteArray = byteArrayOf()
-    override fun computeEncodeSize(type: Type, data: Any?): Int {
+    override fun computeEncodeSize(type: Type, data: Any): Int {
         if (type.dynamic) {
             return 32 + (32 * ceil((data as String).hexBytesLength / 32.0).toInt())
         }
         return 32
     }
 
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) {
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) {
         require(data is String) { "unsupported type $data" }
         if (type.dynamic) {
             NumberCodec.encode(data.hexBytesLength, buffer)
@@ -188,9 +188,9 @@ data object BytesCodec : PrimitiveCodec<ByteArray>() {
 }
 
 data object AddressCodec : PrimitiveCodec<String>() {
-    override fun computeEncodeSize(type: Type, data: Any?): Int = 32
+    override fun computeEncodeSize(type: Type, data: Any): Int = 32
 
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) = encode(data, buffer)
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) = encode(data, buffer)
 
     private fun encode(data: Any?, buffer: ByteBuffer) {
         data as String
@@ -204,15 +204,15 @@ data object AddressCodec : PrimitiveCodec<String>() {
 }
 
 data object ArrayCodec : Codec {
-    override fun computeEncodeSize(type: Type, data: Any?): Int {
+    override fun computeEncodeSize(type: Type, data: Any): Int {
         require(data is Collection<*> && type is ArrayType)
         var offset = 0
         if (type.dynamic) offset += 32
         if (type.elementType.dynamic) offset += data.size * 32
-        return offset + data.sumOf { Codec.computeEncodeSize(type.elementType, it) }
+        return offset + data.sumOf { Codec.computeEncodeSize(type.elementType, it!!) }
     }
 
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) {
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) {
         require(data is Collection<*> && type is ArrayType)
         if (type.size != null) {
             require(type.size == data.size) { "Given arguments count doesn't match array length" }
@@ -225,10 +225,10 @@ data object ArrayCodec : Codec {
             var dynamicSize = 0
             data.forEach {
                 NumberCodec.encode(staticSize + dynamicSize, buffer)
-                dynamicSize += Codec.computeEncodeSize(type.elementType, it)
+                dynamicSize += Codec.computeEncodeSize(type.elementType, it!!)
             }
         }
-        data.forEach { Codec.encode(type.elementType, it, buffer) }
+        data.forEach { Codec.encode(type.elementType, it!!, buffer) }
     }
 
     override fun decode(type: Type, context: Codec.DecodingContext): List<*> {
@@ -248,7 +248,7 @@ data object ArrayCodec : Codec {
 }
 
 data object TupleCodec : Codec {
-    override fun computeEncodeSize(type: Type, data: Any?): Int {
+    override fun computeEncodeSize(type: Type, data: Any): Int {
         return asSequence(type, data).sumOf { (type, data) ->
             when (type.dynamic) {
                 true -> 32
@@ -257,7 +257,7 @@ data object TupleCodec : Codec {
         }
     }
 
-    override fun encode(type: Type, data: Any?, buffer: ByteBuffer) {
+    override fun encode(type: Type, data: Any, buffer: ByteBuffer) {
         val staticSize = asSequence(type, data).sumOf { (type, data) ->
             when (type.dynamic) {
                 true -> 32
@@ -279,10 +279,10 @@ data object TupleCodec : Codec {
         }
     }
 
-    private fun asSequence(type: Type, data: Any?): Sequence<Pair<Type, Any?>> {
+    private fun asSequence(type: Type, data: Any?): Sequence<Pair<Type, Any>> {
         require(type is TupleType && data is Collection<*>)
         val dataIterator = data.iterator()
-        return type.components.asSequence().map { it to dataIterator.next() }
+        return type.components.asSequence().map { it to dataIterator.next()!! }
     }
 
     override fun decode(type: Type, context: Codec.DecodingContext): List<Any> {
