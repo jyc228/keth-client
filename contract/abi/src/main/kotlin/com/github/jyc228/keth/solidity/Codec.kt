@@ -195,7 +195,7 @@ data object AddressCodec : PrimitiveCodec<String>() {
     private fun encode(data: Any?, buffer: ByteBuffer) {
         data as String
         require(data.length == 40 || data.length == 42) { "invalid address length: ${data.length}" }
-        buffer.position(12).putHexString(data)
+        buffer.position(buffer.position() + 12).putHexString(data)
     }
 
     override fun decodeTyped(type: Type, context: Codec.DecodingContext): String {
