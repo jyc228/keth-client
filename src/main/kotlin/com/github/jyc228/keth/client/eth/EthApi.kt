@@ -59,6 +59,7 @@ interface EthApi {
 
     suspend fun newFilter(request: GetLogsRequest): ApiResult<String>
     suspend fun newFilter(init: GetLogsRequest.() -> Unit): ApiResult<String> = newFilter(GetLogsRequest().apply(init))
+    suspend fun newBlockFilter(): ApiResult<FilterId<Hash>>
     suspend fun uninstallFilter(filterId: String): ApiResult<Boolean>
     suspend fun getFilterLogs(filterId: String): ApiResult<List<Log>>
     suspend fun <T> getFilterChanges(filterId: FilterId<T>): ApiResult<List<T>>

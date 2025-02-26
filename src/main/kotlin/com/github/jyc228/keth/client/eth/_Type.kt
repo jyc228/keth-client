@@ -45,6 +45,7 @@ class FilterId<T> internal constructor(
     val serializer: KSerializer<List<T>>
 ) {
     companion object {
+        fun blockHash(filterId: String): FilterId<Hash> = FilterId(filterId, serializer())
         fun log(filterId: String): FilterId<Log> = FilterId(filterId, serializer())
     }
 }

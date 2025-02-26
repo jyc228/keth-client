@@ -10,10 +10,10 @@ import com.github.jyc228.keth.type.HexBigInt
 import com.github.jyc228.keth.type.HexData
 import com.github.jyc228.keth.type.HexString
 import com.github.jyc228.keth.type.HexULong
-import java.math.BigInteger
 import org.web3j.crypto.Credentials
 import org.web3j.crypto.TransactionEncoder
 import org.web3j.utils.Numeric
+import java.math.BigInteger
 
 class EthJsonRpcApi(
     client: JsonRpcClientWrapper,
@@ -94,6 +94,9 @@ class EthJsonRpcApi(
     ): ApiResult<AccountProof?> = "eth_getProof"(address, storageKeys, ref)
 
     override suspend fun newFilter(request: GetLogsRequest): ApiResult<String> = "eth_newFilter"(request)
+    override suspend fun newBlockFilter(): ApiResult<FilterId<Hash>> =
+        "eth_newBlockFilter"<String>().map { FilterId.blockHash(it) }
+
     override suspend fun uninstallFilter(filterId: String): ApiResult<Boolean> = "eth_uninstallFilter"(filterId)
     override suspend fun getFilterLogs(filterId: String): ApiResult<List<Log>> = "eth_getFilterLogs"(filterId)
     override suspend fun <T> getFilterChanges(filterId: FilterId<T>): ApiResult<List<T>> =
