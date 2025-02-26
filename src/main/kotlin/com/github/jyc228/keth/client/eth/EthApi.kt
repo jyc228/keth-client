@@ -57,8 +57,8 @@ interface EthApi {
     suspend fun getStorageAt(address: Address, key: HexString, ref: BlockReference = latest): ApiResult<HexData?>
     suspend fun getProof(address: Address, storageKeys: List<HexData>, ref: BlockReference = latest): ApiResult<AccountProof?>
 
-    suspend fun newFilter(request: GetLogsRequest): ApiResult<String>
-    suspend fun newFilter(init: GetLogsRequest.() -> Unit): ApiResult<String> = newFilter(GetLogsRequest().apply(init))
+    suspend fun newFilter(request: GetLogsRequest): ApiResult<FilterId<Log>>
+    suspend fun newFilter(init: GetLogsRequest.() -> Unit): ApiResult<FilterId<Log>> = newFilter(GetLogsRequest().apply(init))
     suspend fun newBlockFilter(): ApiResult<FilterId<Hash>>
     suspend fun uninstallFilter(filterId: String): ApiResult<Boolean>
     suspend fun getFilterLogs(filterId: String): ApiResult<List<Log>>

@@ -93,7 +93,9 @@ class EthJsonRpcApi(
         ref: BlockReference
     ): ApiResult<AccountProof?> = "eth_getProof"(address, storageKeys, ref)
 
-    override suspend fun newFilter(request: GetLogsRequest): ApiResult<String> = "eth_newFilter"(request)
+    override suspend fun newFilter(request: GetLogsRequest): ApiResult<FilterId<Log>> =
+        "eth_newFilter"<String, GetLogsRequest>(request).map { FilterId.log(it) }
+
     override suspend fun newBlockFilter(): ApiResult<FilterId<Hash>> =
         "eth_newBlockFilter"<String>().map { FilterId.blockHash(it) }
 
