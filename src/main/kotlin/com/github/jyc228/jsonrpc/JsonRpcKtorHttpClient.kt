@@ -11,6 +11,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.serialization.kotlinx.json.*
+import kotlinx.coroutines.CoroutineScope
 import java.util.*
 
 internal class JsonRpcKtorHttpClient(
@@ -18,6 +19,8 @@ internal class JsonRpcKtorHttpClient(
     private val algorithm: Algorithm? = null
 ) : JsonRpcClient {
     constructor(url: String, jwtSecret: String? = null) : this(httpClient(url), hmac256(jwtSecret))
+
+    override val coroutineScope: CoroutineScope = http
 
     override suspend fun send(request: JsonRpcRequest): JsonRpcResponse {
         return http.post {

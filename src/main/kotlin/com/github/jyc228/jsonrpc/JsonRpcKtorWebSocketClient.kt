@@ -1,12 +1,11 @@
 package com.github.jyc228.jsonrpc
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.websocket.WebSockets
-import io.ktor.client.plugins.websocket.sendSerialized
-import io.ktor.client.plugins.websocket.webSocketSession
-import io.ktor.serialization.kotlinx.KotlinxWebsocketSerializationConverter
-import io.ktor.websocket.WebSocketSession
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.websocket.*
+import io.ktor.serialization.kotlinx.*
+import io.ktor.websocket.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.launch
@@ -18,6 +17,7 @@ internal class JsonRpcKtorWebSocketClient(
 ) : JsonRpcClient, AutoCloseable {
     constructor(url: String) : this(url, webSocketClient())
 
+    override val coroutineScope: CoroutineScope = http
     private val requestChannel = mutableMapOf<String, Channel<JsonRpcResponse>>()
     private val session = http.async { http.webSocketSession(url) { }.apply { handleIncoming() } }
 

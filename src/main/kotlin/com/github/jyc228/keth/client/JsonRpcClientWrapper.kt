@@ -2,11 +2,6 @@ package com.github.jyc228.keth.client
 
 import com.github.jyc228.jsonrpc.JsonRpcClient
 import com.github.jyc228.jsonrpc.JsonRpcRequest
-import java.util.concurrent.atomic.AtomicLong
-import kotlin.math.min
-import kotlin.time.Duration
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -16,6 +11,9 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
+import java.util.concurrent.atomic.AtomicLong
+import kotlin.math.min
+import kotlin.time.Duration
 
 sealed class JsonRpcClientWrapper {
     abstract suspend fun <T> send(
@@ -58,12 +56,17 @@ sealed class DeferredJsonRpcClient(
     }
 
     protected suspend fun executeAndSendResult(calls: List<DeferredApiResult<*>>) {
-        val response = client.sendBatch(calls.map { it.request })
-        calls.onEachIndexed { index, call ->
-            call.onResponse.send(when (call.request.id == response[index].id) {
+        val response = try {
+            client.sendBatch(calls.map { it.request })
+        } catch (e: Throwable) {
+            return calls.forEach { call -> call.onResponse.close(e) }
+        }
+        calls.forEachIndexed { index, call ->
+            val response = when (call.request.id == response[index].id) {
                 true -> response[index]
                 false -> response.first { call.request.id == it.id }
-            })
+            }
+            call.onResponse.send(response)
         }
     }
 
@@ -94,7 +97,7 @@ class ScheduledJsonRpcClient(
 ) : DeferredJsonRpcClient(client, json) {
     private val calls = mutableListOf<DeferredApiResult<*>>()
     private val mutex = Mutex()
-    private val job = CoroutineScope(Dispatchers.IO).launch {
+    private val job = client.coroutineScope.launch {
         while (isActive) {
             delay(interval)
             val calls = collectCalls().takeIf { it.isNotEmpty() } ?: continue
