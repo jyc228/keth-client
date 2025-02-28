@@ -33,3 +33,5 @@ data class JsonRpcException(
     val id: String,
     val error: JsonRpcError
 ) : RuntimeException("[$id] ${error.message} (${error.code})")
+
+class JsonRpcSendException(message: String) : RuntimeException(message)

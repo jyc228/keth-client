@@ -2,20 +2,16 @@ package com.github.jyc228.jsonrpc
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import io.ktor.client.HttpClient
-import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.request.bearerAuth
-import io.ktor.client.request.headers
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
-import io.ktor.http.ContentType
-import io.ktor.http.HttpMessageBuilder
-import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
-import java.util.Date
+import io.ktor.client.*
+import io.ktor.client.call.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.plugins.*
+import io.ktor.client.plugins.contentnegotiation.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.http.*
+import io.ktor.serialization.kotlinx.json.*
+import java.util.*
 
 internal class JsonRpcKtorHttpClient(
     private val http: HttpClient,
@@ -28,7 +24,7 @@ internal class JsonRpcKtorHttpClient(
             jwtAuth()
             contentType(ContentType.Application.Json)
             setBody(request)
-        }.body()
+        }.decodeOrThrow()
     }
 
     override suspend fun sendBatch(requests: List<JsonRpcRequest>): List<JsonRpcResponse> {
@@ -36,7 +32,12 @@ internal class JsonRpcKtorHttpClient(
             jwtAuth()
             contentType(ContentType.Application.Json)
             setBody(requests)
-        }.body<List<JsonRpcResponse>>()
+        }.decodeOrThrow<List<JsonRpcResponse>>()
+    }
+
+    private suspend inline fun <reified T> HttpResponse.decodeOrThrow(): T {
+        if (status.isSuccess()) return body()
+        throw JsonRpcSendException("status: ${status.value}, body: ${bodyAsText()}")
     }
 
     private fun HttpMessageBuilder.jwtAuth() {
